@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import XpDashboardCard from "@/components/XpDashboardCard";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 interface Profile {
   stack: string;
@@ -108,6 +110,9 @@ export default function Dashboard() {
     }
   }
 
+  // Reveal dashboard blocks as they mount / scroll into view.
+  useScrollReveal([loading, profile, tasks.length]);
+
   if (loading) return <p className="text-[var(--color-text-2)]">Loading…</p>;
 
   if (!profile) {
@@ -161,8 +166,11 @@ export default function Dashboard() {
         </div>
       )}
 
+      <XpDashboardCard />
+
       {/* profile summary */}
       <section
+        data-reveal
         className="rounded-[14px] p-6"
         style={{ background: "var(--color-raised)", border: "1px solid var(--color-border-2)" }}
       >
@@ -208,7 +216,7 @@ export default function Dashboard() {
       </section>
 
       {/* generate */}
-      <section>
+      <section data-reveal>
         <div className="flex items-baseline gap-3 mb-3">
           <h2 className="text-[18px] font-semibold">Generate a new task</h2>
           <span className="text-[13px] text-[var(--color-text-2)]">scoped to your stack</span>
@@ -248,7 +256,7 @@ export default function Dashboard() {
       </section>
 
       {/* recent tasks */}
-      <section>
+      <section data-reveal>
         <h2 className="text-[18px] font-semibold mb-3">Recent tasks</h2>
         {tasks.length === 0 ? (
           <div

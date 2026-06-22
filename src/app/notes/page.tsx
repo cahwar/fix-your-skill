@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Markdown from "@/components/Markdown";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 interface Note {
   id: string;
@@ -36,6 +37,9 @@ export default function NotesPage() {
     const t = setTimeout(() => load(q), 250);
     return () => clearTimeout(t);
   }, [q]);
+
+  // Reveal note cards as they load / scroll into view.
+  useScrollReveal([loading, notes]);
 
   return (
     <div className="space-y-6">
@@ -84,6 +88,7 @@ export default function NotesPage() {
           {notes.map((n) => (
             <article
               key={n.id}
+              data-reveal
               className="rounded-[13px] p-6"
               style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)" }}
             >

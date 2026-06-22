@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import XpBadge from "@/components/XpBadge";
 
 const LINKS = [
   { href: "/", label: "Dashboard" },
@@ -35,7 +36,9 @@ export default function Nav() {
             <span className="text-[var(--color-accent)]">·</span>skills
           </span>
         </Link>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-4">
+          <XpBadge />
+          <div className="flex items-center gap-1">
           {LINKS.map((l) => {
             const active = isActive(l.href);
             return (
@@ -53,6 +56,7 @@ export default function Nav() {
               </Link>
             );
           })}
+          </div>
         </div>
       </nav>
     </header>

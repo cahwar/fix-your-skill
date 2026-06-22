@@ -4,6 +4,8 @@ import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import CodeEditor from "@/components/CodeEditor";
 import Markdown from "@/components/Markdown";
+import { useXp } from "@/components/XpProvider";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 interface RubricItem { id: string; description: string; weight: number }
 interface TaskDTO {
@@ -64,6 +66,7 @@ function sevTagStyle(s: string) {
 
 export default function TaskPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { award } = useXp();
   const [task, setTask] = useState<TaskDTO | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [code, setCode] = useState("");
@@ -91,6 +94,8 @@ export default function TaskPage({ params }: { params: Promise<{ id: string }> }
   async function submit() {
     setError(null);
     setSubmitting(true);
+    // XP is only awarded for the *first* review of a task (anti-farming).
+    const firstReview = task?.status !== "reviewed";
     try {
       const res = await fetch(`/api/tasks/${id}/submit`, {
         method: "POST",
@@ -100,6 +105,10 @@ export default function TaskPage({ params }: { params: Promise<{ id: string }> }
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Review failed");
       setReview(data.review);
+      if (firstReview && data.review) {
+        award(data.review.scorePercent, data.review.verdict);
+        setTask((t) => (t ? { ...t, status: "reviewed" } : t));
+      }
       setTimeout(
         () => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }),
         50,
@@ -110,6 +119,9 @@ export default function TaskPage({ params }: { params: Promise<{ id: string }> }
       setSubmitting(false);
     }
   }
+
+  // Reveal review sections as they mount / scroll into view.
+  useScrollReveal([loading, review]);
 
   if (loading) return <p className="text-[var(--color-text-2)]">Loading…</p>;
   if (notFound || !task)
@@ -261,7 +273,7 @@ function ReviewPanel({ review }: { review: ReviewDTO }) {
   return (
     <div style={{ borderTop: "1px solid var(--color-border-soft)" }} className="pt-9 space-y-8">
       {/* header */}
-      <div className="flex items-center gap-6">
+      <div data-reveal className="flex items-center gap-6">
         <div
           className="relative w-[104px] h-[104px] rounded-full flex-none"
           style={{ background: `conic-gradient(${ringColor} ${deg}deg, #2c2823 ${deg}deg)` }}
@@ -340,6 +352,7 @@ function ReviewPanel({ review }: { review: ReviewDTO }) {
 
       {/* saved to notes */}
       <div
+        data-reveal
         className="rounded-[14px] p-6"
         style={{
           background: "linear-gradient(135deg, rgba(124,108,255,0.10), rgba(124,108,255,0.04))",
@@ -378,7 +391,7 @@ function ReviewPanel({ review }: { review: ReviewDTO }) {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div>
+    <div data-reveal>
       <div className="flex items-center gap-3 mb-3">
         <h3 className="text-[15px] font-semibold">{title}</h3>
         <div className="flex-1 h-px" style={{ background: "var(--color-border-soft)" }} />
