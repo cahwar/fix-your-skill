@@ -32,6 +32,7 @@ export async function POST(req: Request) {
         level: profile.level,
         goals: profile.goals,
         weakAreas: parseJsonArray(profile.weakAreas),
+        language: profile.language,
       },
       taskType,
     );

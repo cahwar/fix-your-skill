@@ -32,6 +32,7 @@ export async function POST(
       },
       code,
       task.profile.stack,
+      task.profile.language,
     );
 
     const submission = await prisma.submission.create({

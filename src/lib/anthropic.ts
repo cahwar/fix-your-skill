@@ -70,9 +70,10 @@ export async function reviewSubmission(
   },
   code: string,
   stack: string,
+  language?: string,
 ): Promise<ReviewResult> {
   if (!hasApiKey()) return mockReview(task, code);
-  const { system, user } = buildReviewPrompt(task, code, stack);
+  const { system, user } = buildReviewPrompt(task, code, stack, language);
   return structuredCall<ReviewResult>({
     system,
     user,

@@ -9,6 +9,18 @@ const STACK_PRESETS = [
   "roblox + knit + luau",
   "roblox + luau (vanilla)",
 ];
+// Output language for AI-generated tasks & reviews. Labels shown natively.
+const LANGUAGES: { code: string; label: string }[] = [
+  { code: "en", label: "English" },
+  { code: "ru", label: "Русский" },
+  { code: "uk", label: "Українська" },
+  { code: "es", label: "Español" },
+  { code: "pt", label: "Português" },
+  { code: "de", label: "Deutsch" },
+  { code: "fr", label: "Français" },
+  { code: "zh", label: "中文" },
+  { code: "ja", label: "日本語" },
+];
 
 const inputBase =
   "w-full rounded-[10px] px-[14px] py-[12px] outline-none transition-shadow";
@@ -22,6 +34,7 @@ export default function ProfilePage() {
   const [stack, setStack] = useState("");
   const [level, setLevel] = useState("middle");
   const [goals, setGoals] = useState("");
+  const [language, setLanguage] = useState("en");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -37,6 +50,7 @@ export default function ProfilePage() {
           setStack(d.profile.stack);
           setLevel(d.profile.level);
           setGoals(d.profile.goals);
+          setLanguage(d.profile.language ?? "en");
         }
         setLoading(false);
       });
@@ -52,7 +66,7 @@ export default function ProfilePage() {
     const res = await fetch("/api/profile", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ stack, level, goals }),
+      body: JSON.stringify({ stack, level, goals, language }),
     });
     setSaving(false);
     if (!res.ok) return;
@@ -164,6 +178,38 @@ export default function ProfilePage() {
             e.currentTarget.style.boxShadow = "none";
           }}
         />
+      </div>
+
+      {/* language */}
+      <div className="space-y-2.5">
+        <label className="text-[13px] font-medium block">
+          Task &amp; review language
+        </label>
+        <select
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}
+          className={`${inputBase} text-[14px] cursor-pointer`}
+          style={inputStyle}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = "var(--color-accent)";
+            e.currentTarget.style.boxShadow = "0 0 0 3px rgba(124,108,255,0.15)";
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = "var(--color-input-border)";
+            e.currentTarget.style.boxShadow = "none";
+          }}
+        >
+          {LANGUAGES.map((l) => (
+            <option key={l.code} value={l.code} style={{ background: "var(--color-surface)" }}>
+              {l.label}
+            </option>
+          ))}
+        </select>
+        <p className="text-[var(--color-text-2)] text-[12.5px]">
+          New tasks and reviews are written in this language. Code, identifiers
+          and framework/tool names stay in their original form. Existing tasks
+          and notes are unchanged.
+        </p>
       </div>
 
       <div className="flex items-center gap-3">

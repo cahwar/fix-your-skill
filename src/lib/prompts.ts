@@ -5,6 +5,41 @@ export interface ProfileInput {
   level: string;
   goals: string;
   weakAreas: string[];
+  language?: string;
+}
+
+/**
+ * Languages the AI-generated content (tasks/reviews/notes) can be written in.
+ * Keys are the codes stored on the profile; values are the English names handed
+ * to the model. "en" is the default and produces no extra instruction.
+ */
+export const SUPPORTED_LANGUAGES: Record<string, string> = {
+  en: "English",
+  ru: "Russian",
+  uk: "Ukrainian",
+  es: "Spanish",
+  pt: "Portuguese",
+  de: "German",
+  fr: "French",
+  zh: "Chinese (Simplified)",
+  ja: "Japanese",
+};
+
+/**
+ * Instruction appended to a system prompt so the model writes prose in the
+ * chosen language while leaving code, identifiers and tool/framework names in
+ * their original form. Returns null for English (the default — no-op).
+ */
+export function languageDirective(language: string | undefined): string | null {
+  if (!language || language === "en") return null;
+  const name = SUPPORTED_LANGUAGES[language] ?? language;
+  return [
+    `IMPORTANT — OUTPUT LANGUAGE: Write all natural-language prose for the user in ${name}.`,
+    "This covers the task statement, constraints, hints, rubric descriptions, every review summary, suggestion, trade-off, what-to-learn-next item, the note title and the note markdown body.",
+    "KEEP IN THEIR ORIGINAL FORM — never translate: all code and code blocks; identifiers and variable/function/type names; API, library, framework and tool names (e.g. Flamework, Knit, roblox-ts, Luau, RunService, Promise); and established technical terms developers normally keep in English.",
+    `Write naturally as a fluent engineer would in ${name} — do not translate word-for-word, and never alter the code itself.`,
+    "Any machine-readable identifiers or tags (e.g. kebab-case weakAreaTags, rubric ids) MUST stay in English.",
+  ].join(" ");
 }
 
 const TASK_TYPE_GUIDANCE: Record<TaskType, string> = {
@@ -31,7 +66,10 @@ export function buildTaskGenerationPrompt(
     "Tailor every task tightly to the user's exact stack and its idioms. If the stack is a Roblox framework (Knit, Flamework, etc.), the task and starter code must use that framework's real conventions.",
     "Set `testable: true` ONLY when the solution is pure logic that could run without the Roblox runtime (no Instances, services, or framework DI). Framework-coupled or design tasks must be `testable: false`.",
     "Keep difficulty calibrated to the user's level. Make the statement unambiguous and the rubric concrete.",
-  ].join(" ");
+    languageDirective(profile.language),
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   const user = [
     `Stack: ${profile.stack}`,
@@ -56,6 +94,7 @@ export function buildReviewPrompt(
   },
   code: string,
   stack: string,
+  language?: string,
 ): { system: string; user: string } {
   const system = [
     "You are a senior code reviewer and teacher for the user's exact stack.",
@@ -64,7 +103,10 @@ export function buildReviewPrompt(
     "Then produce `whatToLearnNext` (concrete next steps) and a distilled `noteMarkdown` the user can save and memorize — it should capture the durable lesson, not just restate the task.",
     "`weakAreaTags` must be short kebab-case tags identifying what the user struggled with, used to adapt future tasks.",
     "Score 0-100 honestly. verdict: pass (>=80 and no blockers), needs-work (40-79 or has majors), fail (<40 or has blockers).",
-  ].join(" ");
+    languageDirective(language),
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   const user = [
     `Stack: ${stack}`,

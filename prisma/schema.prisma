@@ -16,6 +16,8 @@ model Profile {
   stack     String
   level     String   @default("middle") // junior | middle | senior
   goals     String   @default("")
+  // Output language for AI-generated tasks & reviews (BCP-47-ish code). "en" = default English.
+  language  String   @default("en")
   // JSON array of weak-area tags accumulated from reviews, e.g. ["error-handling","DI-lifecycle"]
   weakAreas String   @default("[]")
   createdAt DateTime @default(now())

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { parseJsonArray } from "@/lib/mappers";
+import { SUPPORTED_LANGUAGES } from "@/lib/prompts";
 
 // Single-user MVP: the "current" profile is the most recently updated one.
 export async function GET() {
@@ -14,6 +15,7 @@ export async function GET() {
       stack: profile.stack,
       level: profile.level,
       goals: profile.goals,
+      language: profile.language,
       weakAreas: parseJsonArray(profile.weakAreas),
     },
   });
@@ -24,6 +26,9 @@ export async function POST(req: Request) {
   const stack = String(body.stack ?? "").trim();
   const level = String(body.level ?? "middle").trim();
   const goals = String(body.goals ?? "").trim();
+  const rawLanguage = String(body.language ?? "en").trim();
+  // Only accept known language codes; fall back to English otherwise.
+  const language = rawLanguage in SUPPORTED_LANGUAGES ? rawLanguage : "en";
 
   if (!stack) {
     return NextResponse.json({ error: "Stack is required" }, { status: 400 });
@@ -36,10 +41,10 @@ export async function POST(req: Request) {
   const profile = existing
     ? await prisma.profile.update({
         where: { id: existing.id },
-        data: { stack, level, goals },
+        data: { stack, level, goals, language },
       })
     : await prisma.profile.create({
-        data: { stack, level, goals },
+        data: { stack, level, goals, language },
       });
 
   return NextResponse.json({
@@ -48,6 +53,7 @@ export async function POST(req: Request) {
       stack: profile.stack,
       level: profile.level,
       goals: profile.goals,
+      language: profile.language,
       weakAreas: parseJsonArray(profile.weakAreas),
     },
   });
