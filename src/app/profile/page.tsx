@@ -26,6 +26,8 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [stackError, setStackError] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     fetch("/api/profile")
@@ -56,6 +58,15 @@ export default function ProfilePage() {
     if (!res.ok) return;
     setSaved(true);
     setTimeout(() => router.push("/"), 650);
+  }
+
+  async function reset() {
+    setResetting(true);
+    const res = await fetch("/api/reset", { method: "POST" });
+    setResetting(false);
+    if (!res.ok) return;
+    router.push("/");
+    router.refresh();
   }
 
   if (loading) return <p className="text-[var(--color-text-2)]">Loading…</p>;
@@ -165,6 +176,47 @@ export default function ProfilePage() {
           {saving ? "Saving…" : "Save profile"}
         </button>
         {saved && <span className="text-[var(--color-pos)] text-[14px]">✓ Saved</span>}
+      </div>
+
+      {/* danger zone */}
+      <div
+        className="rounded-[12px] p-5 space-y-3 mt-2"
+        style={{ background: "var(--color-surface)", border: "1px solid var(--color-neg)" }}
+      >
+        <div>
+          <h2 className="text-[15px] font-semibold text-[var(--color-neg)]">Danger zone</h2>
+          <p className="text-[var(--color-text-2)] text-[13px] mt-1">
+            Reset wipes your profile, all tasks, submissions, reviews and notes. This cannot be undone.
+          </p>
+        </div>
+
+        {!confirmReset ? (
+          <button
+            onClick={() => setConfirmReset(true)}
+            className="rounded-[10px] font-medium px-4 py-2 text-[14px] transition-colors"
+            style={{ background: "transparent", border: "1px solid var(--color-neg)", color: "var(--color-neg)" }}
+          >
+            Reset account
+          </button>
+        ) : (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={reset}
+              disabled={resetting}
+              className="rounded-[10px] text-white font-medium px-4 py-2 text-[14px] disabled:opacity-60"
+              style={{ background: "var(--color-neg)" }}
+            >
+              {resetting ? "Resetting…" : "Yes, delete everything"}
+            </button>
+            <button
+              onClick={() => setConfirmReset(false)}
+              disabled={resetting}
+              className="text-[14px] text-[var(--color-text-2)] hover:text-[var(--color-text)] disabled:opacity-60"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
