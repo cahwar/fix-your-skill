@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local SQLite database (keep schema + migrations, ignore the db file)
+/prisma/dev.db
+/prisma/dev.db-journal
+/prisma/*.db
+
+# Claude local settings (keep launch.json, ignore machine-local settings)
+.claude/settings.local.json

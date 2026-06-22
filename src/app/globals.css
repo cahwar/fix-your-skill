@@ -1,26 +1,202 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* surfaces (warm-slate dark) */
+  --color-bg: #1a1817;
+  --color-surface: #1e1b19;
+  --color-raised: #211e1b;
+  --color-code: #121117;
+  --color-code-gutter: #15140f;
+
+  /* borders */
+  --color-border: #2e2a25;
+  --color-border-soft: #2a2722;
+  --color-border-2: #322e29;
+  --color-input-border: #34302c;
+
+  /* text */
+  --color-text: #edeae4;
+  --color-text-2: #948e83;
+  --color-muted: #8a8378;
+  --color-prose: #d7d2c9;
+
+  /* accent (violet) */
+  --color-accent: #7c6cff;
+  --color-accent-hi: #9486ff;
+  --color-accent-soft: #c9a9f0;
+
+  /* semantic */
+  --color-pos: #59c2a0;
+  --color-caution: #e3a857;
+  --color-neg: #e0746e;
+
+  /* type */
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-jbmono), ui-monospace, monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+/* spinner */
+@keyframes fys-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: fys-spin 0.7s linear infinite;
+}
+
+/* skeleton pulse */
+@keyframes fys-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+.skeleton {
+  background: var(--color-raised);
+  border-radius: 10px;
+  animation: fys-pulse 1.3s ease-in-out infinite;
+}
+
+/* ---- Markdown / prose ---- */
+.md {
+  font-size: 15px;
+  line-height: 1.72;
+  color: var(--color-prose);
+}
+.md > :first-child {
+  margin-top: 0;
+}
+.md > :last-child {
+  margin-bottom: 0;
+}
+.md h1,
+.md h2,
+.md h3,
+.md h4 {
+  color: var(--color-text);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 22px 0 10px;
+  line-height: 1.3;
+}
+.md h1 {
+  font-size: 21px;
+}
+.md h2 {
+  font-size: 17.5px;
+}
+.md h3 {
+  font-size: 15px;
+}
+.md h4 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+}
+.md p {
+  margin: 12px 0;
+}
+.md strong {
+  color: #f3f0ea;
+  font-weight: 600;
+}
+.md ul,
+.md ol {
+  padding-left: 21px;
+  margin: 12px 0;
+}
+.md li {
+  margin: 6px 0;
+}
+.md ul li::marker,
+.md ol li::marker {
+  color: var(--color-accent);
+}
+.md code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: #26221d;
+  border: 1px solid #38332c;
+  border-radius: 5px;
+  padding: 1.5px 5px;
+  color: #e8c79c;
+}
+.md pre {
+  background: var(--color-code);
+  border: 1px solid #2b2823;
+  border-radius: 9px;
+  padding: 15px 17px;
+  overflow-x: auto;
+  margin: 14px 0;
+}
+.md pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #cfc8bd;
+  font-size: 13px;
+  line-height: 1.65;
+}
+.md a {
+  color: var(--color-accent-hi);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(148, 134, 255, 0.32);
+}
+.md a:hover {
+  border-bottom-color: var(--color-accent-hi);
+}
+.md table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0;
+}
+.md th,
+.md td {
+  border: 1px solid #34302a;
+  padding: 8px 12px;
+  text-align: left;
+}
+.md th {
+  background: #221f1b;
+  font-weight: 600;
+}
+.md blockquote {
+  border-left: 2px solid var(--color-accent);
+  margin: 14px 0;
+  padding-left: 14px;
+  color: var(--color-text-2);
+}
+.md hr {
+  border: none;
+  border-top: 1px solid #322f2a;
+  margin: 18px 0;
 }

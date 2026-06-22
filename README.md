@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# fix-your-skills
 
-## Getting Started
+Practice your **problem solving** by hand while AI writes your production code. The app
+generates coding tasks tailored to your stack, you solve them, and it reviews your solution
+with educational feedback that gets saved as study notes.
 
-First, run the development server:
+## The loop
+
+1. **Profile** — describe your stack (e.g. `roblox + knit + luau`), level, goals.
+2. **Generate** — Claude creates a task scoped to your stack (mini-feature, system design, or debug/refactor).
+3. **Solve** — write your solution in the in-browser editor.
+4. **Review** — Claude judges correctness, idiomatic quality for your framework, and trade-offs.
+5. **Notes** — each review distills a memorizable note into a searchable archive.
+6. **Adapt** — weak areas from reviews bias future task generation.
+
+## Stack
+
+Next.js 16 (App Router) · TypeScript · Tailwind · Monaco editor · Prisma + SQLite · Anthropic Claude API (`claude-opus-4-8`), structured outputs.
+
+## Run
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npx prisma migrate dev   # first run only — creates the SQLite DB
+npm run dev              # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Enable real AI (recommended)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The app runs in **mock mode** with sample tasks/reviews until you add a key. Edit `.env`:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+ANTHROPIC_API_KEY="sk-ant-..."
+```
 
-## Learn More
+Restart `npm run dev`. The dashboard banner disappears and tasks/reviews become real and stack-aware.
 
-To learn more about Next.js, take a look at the following resources:
+## Verification of solutions
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Pure-logic** roblox-ts / Luau (no Roblox runtime): auto-testable (planned: `vitest` / `lune`).
+- **Framework-coupled** (Flamework DI, Knit services) & **system design**: LLM review only.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Today every submission goes through LLM review; running real test suites and in-Studio execution
+of framework code are the next milestones (a connected Roblox Studio MCP could bridge the latter).
 
-## Deploy on Vercel
+## Project layout
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+  app/
+    page.tsx              Dashboard (profile summary, generate, recent tasks)
+    profile/page.tsx      Profile editor
+    task/[id]/page.tsx    Task view: statement + Monaco editor + review
+    notes/page.tsx        Notes archive (search)
+    api/                  profile · tasks · tasks/generate · tasks/[id]/submit · notes · status
+  lib/
+    anthropic.ts          Claude calls + structured outputs + mock fallback
+    schemas.ts            Types + JSON schemas for generation & review
+    prompts.ts            Generation & review prompts
+    db.ts                 Prisma client
+    mappers.ts            DB row → DTO helpers
+  components/
+    CodeEditor.tsx        Monaco wrapper
+    Markdown.tsx          Markdown renderer
+prisma/schema.prisma      Profile · Task · Submission · Review · Note
+```

@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:#1a1817;color:#EDEAE4;font-family:'Inter',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+  ::selection{background:rgba(124,108,255,0.32);}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+  @keyframes pulseSkel{0%,100%{opacity:0.45;}50%{opacity:0.8;}}
+  *::-webkit-scrollbar{width:11px;height:11px;}
+  *::-webkit-scrollbar-thumb{background:#36322d;border-radius:7px;border:3px solid transparent;background-clip:padding-box;}
+  *::-webkit-scrollbar-thumb:hover{background:#45403a;border:3px solid transparent;background-clip:padding-box;}
+  textarea,input{font-family:inherit;}
+  .md{font-size:15px;line-height:1.72;color:#D7D2C9;}
+  .md > :first-child{margin-top:0;}
+  .md > :last-child{margin-bottom:0;}
+  .md h1,.md h2,.md h3,.md h4{color:#EDEAE4;font-weight:600;line-height:1.32;margin:22px 0 10px;letter-spacing:-0.01em;}
+  .md h1{font-size:21px;}
+  .md h2{font-size:17.5px;}
+  .md h3{font-size:15px;text-transform:none;}
+  .md h4{font-size:13px;text-transform:uppercase;letter-spacing:0.06em;color:#A8A39A;}
+  .md p{margin:12px 0;}
+  .md ul,.md ol{padding-left:21px;margin:12px 0;}
+  .md li{margin:6px 0;}
+  .md li::marker{color:#7c6cff;}
+  .md a{color:#9486ff;text-decoration:none;border-bottom:1px solid rgba(148,134,255,0.32);}
+  .md a:hover{border-bottom-color:#9486ff;}
+  .md strong{color:#F3F0EA;font-weight:600;}
+  .md code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:0.85em;background:#26221d;border:1px solid #38332c;border-radius:5px;padding:1.5px 5px;color:#E8C79C;}
+  .md pre{background:#121117;border:1px solid #2b2823;border-radius:9px;padding:15px 17px;overflow:auto;margin:15px 0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.02);}
+  .md pre code{background:none;border:none;padding:0;color:#CFC8BD;font-size:13px;line-height:1.65;}
+  .md table{border-collapse:collapse;width:100%;margin:15px 0;font-size:14px;}
+  .md th,.md td{border:1px solid #34302a;padding:8px 12px;text-align:left;}
+  .md th{background:#221f1b;font-weight:600;color:#EDEAE4;}
+  .md hr{border:none;border-top:1px solid #322f2a;margin:20px 0;}
+  .md blockquote{margin:14px 0;padding:4px 16px;border-left:2px solid #7c6cff;color:#B4AEA4;}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;flex-direction:column;">
+
+  <!-- ===== NAV ===== -->
+  <header style="position:sticky;top:0;z-index:50;background:rgba(26,24,23,0.82);backdrop-filter:blur(14px);border-bottom:1px solid #2a2722;">
+    <div style="max-width:1080px;margin:0 auto;padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;">
+      <button onClick="{{ goHome }}" style="display:flex;align-items:center;gap:9px;background:none;border:none;cursor:pointer;padding:0;">
+        <span style="width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#8d7eff,#6a59e0);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(124,108,255,0.35);">
+          <span style="width:8px;height:8px;border-radius:2px;background:#fff;"></span>
+        </span>
+        <span style="font-size:15px;font-weight:600;letter-spacing:-0.01em;color:#EDEAE4;font-family:'JetBrains Mono',monospace;">fix<span style="color:#7c6cff;">·</span>your<span style="color:#7c6cff;">·</span>skills</span>
+      </button>
+      <nav style="display:flex;align-items:center;gap:4px;">
+        <button onClick="{{ goHome }}" style="{{ navDashStyle }}">Dashboard</button>
+        <button onClick="{{ goProfile }}" style="{{ navProfStyle }}">Profile</button>
+        <button onClick="{{ goNotes }}" style="{{ navNotesStyle }}">Notes</button>
+      </nav>
+    </div>
+  </header>
+
+  <main style="max-width:1080px;width:100%;margin:0 auto;padding:36px 32px 96px;flex:1;">
+
+    <!-- ============ DASHBOARD ============ -->
+    <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+    <div>
+
+      <sc-if value="{{ showBanner }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:flex-start;gap:12px;background:rgba(227,168,87,0.08);border:1px solid rgba(227,168,87,0.26);border-radius:10px;padding:13px 15px;margin-bottom:28px;">
+        <span style="flex:none;width:18px;height:18px;border-radius:50%;border:1.5px solid #e0a45a;color:#e0a45a;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px;font-family:'JetBrains Mono',monospace;">i</span>
+        <div style="flex:1;font-size:13.5px;line-height:1.5;color:#D6C7AC;">
+          <strong style="color:#EAD9BC;font-weight:600;">Mock mode</strong> — no API key set. Tasks and reviews are sample data.
+        </div>
+        <button onClick="{{ dismissBanner }}" style="flex:none;background:none;border:none;color:#9b8d72;cursor:pointer;font-size:16px;line-height:1;padding:2px 4px;">×</button>
+      </div>
+      </sc-if>
+
+      <!-- Profile summary -->
+      <div style="background:#211e1b;border:1px solid #322e29;border-radius:14px;padding:24px 26px;margin-bottom:34px;box-shadow:0 1px 0 rgba(255,255,255,0.02) inset;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px;">
+          <div style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8a8378;">Your training profile</div>
+          <button onClick="{{ goProfile }}" style="font-size:12.5px;color:#9486ff;background:none;border:none;cursor:pointer;font-weight:500;padding:0;display:flex;align-items:center;gap:5px;">Edit <span style="font-size:14px;">→</span></button>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:27px;font-weight:600;color:#EDEAE4;letter-spacing:-0.02em;margin-bottom:14px;">{{ profileStack }}</div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px;">
+          <span style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#C9C3B8;background:#2a2621;border:1px solid #38332c;border-radius:7px;padding:4px 11px;">
+            <span style="width:6px;height:6px;border-radius:50%;background:#7c6cff;"></span>{{ profileLevel }}
+          </span>
+          <sc-if value="{{ hasGoals }}" hint-placeholder-val="{{ true }}">
+          <span style="font-size:13px;color:#9b958a;line-height:1.5;">{{ profileGoals }}</span>
+          </sc-if>
+        </div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#8a8378;margin-bottom:9px;">Weak areas</div>
+        <sc-if value="{{ hasWeak }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-wrap:wrap;gap:7px;">
+          <sc-for list="{{ weakAreas }}" as="tag" hint-placeholder-count="3">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#C9A9F0;background:rgba(124,108,255,0.1);border:1px solid rgba(124,108,255,0.26);border-radius:6px;padding:3px 9px;white-space:nowrap;">{{ tag }}</span>
+          </sc-for>
+        </div>
+        </sc-if>
+        <sc-if value="{{ noWeak }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:13px;color:#8a8378;font-style:italic;">None tracked yet — they'll appear as you get reviews.</div>
+        </sc-if>
+      </div>
+
+      <!-- Generate -->
+      <div style="margin-bottom:38px;">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:15px;">
+          <h2 style="font-size:18px;font-weight:600;color:#EDEAE4;margin:0;letter-spacing:-0.01em;">Generate a new task</h2>
+          <span style="font-size:12.5px;color:#8a8378;">scoped to your stack</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:13px;">
+          <sc-for list="{{ genCards }}" as="card" hint-placeholder-count="4">
+            <button onClick="{{ card.onClick }}" disabled="{{ card.disabled }}" style="{{ card.style }}" style-hover="{{ card.hoverStyle }}">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                <span style="{{ card.shapeStyle }}"></span>
+                <sc-if value="{{ card.loading }}" hint-placeholder-val="{{ false }}">
+                  <span style="width:15px;height:15px;border-radius:50%;border:2px solid rgba(124,108,255,0.25);border-top-color:#9486ff;animation:spin 0.7s linear infinite;"></span>
+                </sc-if>
+              </div>
+              <div style="font-size:14.5px;font-weight:600;color:#EDEAE4;margin-bottom:5px;">{{ card.title }}</div>
+              <div style="font-size:12px;line-height:1.45;color:#948e83;">{{ card.desc }}</div>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- Recent tasks -->
+      <div>
+        <h2 style="font-size:18px;font-weight:600;color:#EDEAE4;margin:0 0 15px;letter-spacing:-0.01em;">Recent tasks</h2>
+        <sc-if value="{{ hasTasks }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;border:1px solid #2e2a25;border-radius:12px;overflow:hidden;background:#1e1b19;">
+          <sc-for list="{{ recentTasks }}" as="row" hint-placeholder-count="3">
+            <button onClick="{{ row.onClick }}" style="display:flex;align-items:center;justify-content:space-between;gap:16px;background:none;border:none;border-top:1px solid #2a2722;cursor:pointer;padding:15px 18px;text-align:left;width:100%;transition:background 0.12s;" style-hover="background:#262320;">
+              <div style="min-width:0;">
+                <div style="font-size:14.5px;font-weight:500;color:#E7E2D9;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ row.title }}</div>
+                <div style="font-size:12px;color:#8a8378;font-family:'JetBrains Mono',monospace;">{{ row.meta }}</div>
+              </div>
+              <span style="{{ row.statusStyle }}">{{ row.statusLabel }}</span>
+            </button>
+          </sc-for>
+        </div>
+        </sc-if>
+        <sc-if value="{{ noTasks }}" hint-placeholder-val="{{ false }}">
+        <div style="border:1px dashed #34302a;border-radius:12px;padding:40px;text-align:center;color:#8a8378;font-size:14px;">
+          No tasks yet — pick a type above to <span style="color:#9486ff;">generate your first task</span>.
+        </div>
+        </sc-if>
+      </div>
+
+    </div>
+    </sc-if>
+
+    <!-- ============ PROFILE ============ -->
+    <sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width:600px;margin:0 auto;">
+      <h1 style="font-size:24px;font-weight:600;color:#EDEAE4;margin:0 0 6px;letter-spacing:-0.02em;">Profile</h1>
+      <p style="font-size:14px;color:#948e83;margin:0 0 32px;">Tune what the gym trains. Tasks are generated against this.</p>
+
+      <!-- Stack -->
+      <label style="display:block;font-size:13px;font-weight:600;color:#C9C3B8;margin-bottom:8px;">Stack</label>
+      <input value="{{ formStack }}" onInput="{{ onStack }}" placeholder="roblox + knit + luau" style="{{ stackInputStyle }}" style-focus="border-color:#7c6cff;box-shadow:0 0 0 3px rgba(124,108,255,0.15);" />
+      <sc-if value="{{ stackError }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:12.5px;color:#e0746e;margin-top:7px;">Stack is required.</div>
+      </sc-if>
+      <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:11px;margin-bottom:28px;">
+        <sc-for list="{{ presets }}" as="p" hint-placeholder-count="3">
+          <button onClick="{{ p.onClick }}" style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#A89FB8;background:#221f1d;border:1px solid #34302c;border-radius:7px;padding:5px 11px;cursor:pointer;transition:all 0.12s;" style-hover="border-color:#7c6cff;color:#C9A9F0;background:rgba(124,108,255,0.07);">{{ p.label }}</button>
+        </sc-for>
+      </div>
+
+      <!-- Level -->
+      <label style="display:block;font-size:13px;font-weight:600;color:#C9C3B8;margin-bottom:8px;">Level</label>
+      <div style="display:inline-flex;background:#211e1b;border:1px solid #34302c;border-radius:9px;padding:3px;margin-bottom:28px;">
+        <sc-for list="{{ levelOpts }}" as="lv" hint-placeholder-count="3">
+          <button onClick="{{ lv.onClick }}" style="{{ lv.style }}">{{ lv.label }}</button>
+        </sc-for>
+      </div>
+
+      <!-- Goals -->
+      <label style="display:block;font-size:13px;font-weight:600;color:#C9C3B8;margin-bottom:8px;">Goals <span style="font-weight:400;color:#7a746a;">— optional</span></label>
+      <textarea value="{{ formGoals }}" onInput="{{ onGoals }}" placeholder="get sharper at networking / replication design…" rows="3" style="{{ goalsInputStyle }}" style-focus="border-color:#7c6cff;box-shadow:0 0 0 3px rgba(124,108,255,0.15);"></textarea>
+
+      <div style="display:flex;align-items:center;gap:14px;margin-top:30px;">
+        <button onClick="{{ saveProfile }}" style="background:#7c6cff;color:#fff;border:none;border-radius:9px;padding:11px 22px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(124,108,255,0.3);transition:all 0.12s;" style-hover="background:#8d7eff;">Save profile</button>
+        <sc-if value="{{ savedFlash }}" hint-placeholder-val="{{ false }}">
+          <span style="font-size:13px;color:#59c2a0;display:flex;align-items:center;gap:6px;">✓ Saved</span>
+        </sc-if>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ============ TASK ============ -->
+    <sc-if value="{{ isTask }}" hint-placeholder-val="{{ false }}">
+    <div>
+      <button onClick="{{ goHome }}" style="display:inline-flex;align-items:center;gap:7px;background:none;border:none;color:#948e83;cursor:pointer;font-size:13px;padding:0;margin-bottom:22px;" style-hover="color:#C9C3B8;"><span style="font-size:15px;">←</span> Dashboard</button>
+
+      <sc-if value="{{ taskFound }}" hint-placeholder-val="{{ true }}">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;">
+
+        <!-- LEFT: problem -->
+        <div style="min-width:0;">
+          <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#A89FB8;background:#221f1d;border:1px solid #34302c;border-radius:6px;padding:3px 9px;">{{ t.taskTypeLabel }}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#A89FB8;background:#221f1d;border:1px solid #34302c;border-radius:6px;padding:3px 9px;">{{ t.language }}</span>
+            <span style="{{ t.verifStyle }}">{{ t.verifLabel }}</span>
+          </div>
+          <h1 style="font-size:25px;font-weight:600;color:#EDEAE4;margin:0 0 22px;letter-spacing:-0.02em;line-height:1.2;">{{ t.title }}</h1>
+
+          <div style="background:#1e1b19;border:1px solid #2e2a25;border-radius:13px;padding:24px 26px;margin-bottom:18px;">
+            {{ statementEl }}
+          </div>
+
+          <div style="background:#1e1b19;border:1px solid #2e2a25;border-radius:13px;padding:20px 24px;margin-bottom:18px;">
+            <div style="font-size:11px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:#8a8378;margin-bottom:13px;">Constraints</div>
+            <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;">
+              <sc-for list="{{ constraints }}" as="c" hint-placeholder-count="4">
+                <li style="display:flex;gap:11px;font-size:14px;line-height:1.5;color:#CBC5BB;">
+                  <span style="flex:none;width:5px;height:5px;border-radius:50%;background:#7c6cff;margin-top:8px;"></span>
+                  <span>{{ c }}</span>
+                </li>
+              </sc-for>
+            </ul>
+          </div>
+
+          <div style="background:#1e1b19;border:1px solid #2e2a25;border-radius:13px;overflow:hidden;">
+            <button onClick="{{ toggleHints }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:none;border:none;cursor:pointer;padding:16px 24px;color:#A89FB8;font-size:13px;font-weight:500;" style-hover="color:#C9A9F0;">
+              <span>{{ hintsLabel }}</span>
+              <span style="{{ hintsChevStyle }}">⌄</span>
+            </button>
+            <sc-if value="{{ hintsOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:0 24px 20px;">
+              <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px;">
+                <sc-for list="{{ hints }}" as="h" hint-placeholder-count="3">
+                  <li style="display:flex;gap:11px;font-size:13.5px;line-height:1.5;color:#948e83;">
+                    <span style="flex:none;color:#6a6459;font-family:'JetBrains Mono',monospace;font-size:12px;margin-top:1px;">»</span>
+                    <span>{{ h }}</span>
+                  </li>
+                </sc-for>
+              </ul>
+            </div>
+            </sc-if>
+          </div>
+        </div>
+
+        <!-- RIGHT: solution (sticky) -->
+        <div style="position:sticky;top:84px;min-width:0;">
+          <div style="font-size:11px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:#8a8378;margin-bottom:13px;">Your solution</div>
+
+          <div style="border:1px solid #2b2823;border-radius:12px;overflow:hidden;background:#121117;box-shadow:0 8px 30px rgba(0,0,0,0.25);">
+            <div style="display:flex;align-items:center;gap:8px;padding:11px 14px;background:#1a1816;border-bottom:1px solid #26231e;">
+              <span style="width:11px;height:11px;border-radius:50%;background:#3a3530;"></span>
+              <span style="width:11px;height:11px;border-radius:50%;background:#3a3530;"></span>
+              <span style="width:11px;height:11px;border-radius:50%;background:#3a3530;"></span>
+              <span style="margin-left:8px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#7a746a;">{{ t.fileName }}</span>
+              <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:#5e584f;">{{ t.language }}</span>
+            </div>
+            <div style="display:flex;height:460px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;line-height:21px;">
+              <div ref="{{ gutterRef }}" style="flex:none;width:48px;padding:13px 0;text-align:right;color:#48433b;background:#15140f;border-right:1px solid #221f1a;overflow:hidden;user-select:none;"><pre style="margin:0;font:inherit;white-space:pre;">{{ lineNumbersText }}</pre></div>
+              <textarea ref="{{ taRef }}" value="{{ solutionCode }}" onInput="{{ onCode }}" onKeyDown="{{ onEditorKey }}" onScroll="{{ onEditorScroll }}" spellcheck="false" wrap="off" style="flex:1;background:none;border:none;outline:none;resize:none;color:#CFC8BD;font:inherit;padding:13px 16px;white-space:pre;overflow:auto;tab-size:4;caret-color:#9486ff;"></textarea>
+            </div>
+          </div>
+
+          <div style="margin-top:16px;">
+            <button onClick="{{ submit }}" disabled="{{ reviewing }}" style="{{ submitStyle }}" style-hover="{{ submitHoverStyle }}">
+              <sc-if value="{{ reviewing }}" hint-placeholder-val="{{ false }}">
+                <span style="width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;animation:spin 0.7s linear infinite;"></span>
+              </sc-if>
+              {{ submitLabel }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- REVIEW PANEL -->
+      <sc-if value="{{ reviewing }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:36px;border-top:1px solid #2a2722;padding-top:34px;">
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div style="height:18px;width:120px;border-radius:6px;background:#2a2722;animation:pulseSkel 1.3s ease infinite;"></div>
+          <div style="height:90px;border-radius:12px;background:#221f1b;animation:pulseSkel 1.3s ease infinite;"></div>
+          <div style="height:140px;border-radius:12px;background:#211e1a;animation:pulseSkel 1.3s ease infinite 0.15s;"></div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ showReview }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:38px;border-top:1px solid #2a2722;padding-top:36px;">
+
+        <!-- header: score + verdict -->
+        <div style="display:flex;align-items:center;gap:26px;flex-wrap:wrap;margin-bottom:32px;">
+          <div style="position:relative;width:104px;height:104px;flex:none;border-radius:50%;background:{{ rv.ringStyle }};display:flex;align-items:center;justify-content:center;">
+            <div style="position:absolute;inset:7px;border-radius:50%;background:#1a1817;"></div>
+            <div style="position:relative;text-align:center;">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:600;color:#EDEAE4;line-height:1;">{{ rv.scorePercent }}</div>
+              <div style="font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:#7a746a;margin-top:3px;">score</div>
+            </div>
+          </div>
+          <div style="flex:1;min-width:200px;">
+            <div style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#8a8378;margin-bottom:8px;">Review</div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span style="{{ rv.verdictStyle }}">{{ rv.verdictLabel }}</span>
+              <span style="font-size:13.5px;color:#948e83;">{{ rv.verdictNote }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Correctness -->
+        <section style="margin-bottom:30px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+            <h3 style="font-size:15px;font-weight:600;color:#EDEAE4;margin:0;">Correctness</h3>
+            <div style="flex:1;height:1px;background:#2a2722;"></div>
+          </div>
+          <p style="font-size:14.5px;line-height:1.65;color:#CBC5BB;margin:0 0 16px;">{{ rv.correctnessSummary }}</p>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <sc-for list="{{ rv.issues }}" as="iss" hint-placeholder-count="1">
+              <div style="display:flex;gap:13px;background:#1e1b19;border:1px solid #2e2a25;border-left:3px solid {{ iss.accent }};border-radius:10px;padding:13px 16px;">
+                <span style="{{ iss.tagStyle }}">{{ iss.sevLabel }}</span>
+                <span style="font-size:13.5px;line-height:1.55;color:#C5BFB5;">{{ iss.description }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <!-- Idiomatic -->
+        <section style="margin-bottom:30px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+            <h3 style="font-size:15px;font-weight:600;color:#EDEAE4;margin:0;">Idiomatic quality</h3>
+            <div style="flex:1;height:1px;background:#2a2722;"></div>
+          </div>
+          <p style="font-size:14.5px;line-height:1.65;color:#CBC5BB;margin:0 0 14px;">{{ rv.idiomaticSummary }}</p>
+          <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px;">
+            <sc-for list="{{ rv.idiomaticSuggestions }}" as="s" hint-placeholder-count="3">
+              <li style="display:flex;gap:11px;font-size:13.5px;line-height:1.55;color:#C5BFB5;">
+                <span style="flex:none;width:5px;height:5px;border-radius:50%;background:#7c6cff;margin-top:7px;"></span>
+                <span>{{ s }}</span>
+              </li>
+            </sc-for>
+          </ul>
+        </section>
+
+        <!-- Trade-offs -->
+        <section style="margin-bottom:30px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+            <h3 style="font-size:15px;font-weight:600;color:#EDEAE4;margin:0;">Trade-offs</h3>
+            <div style="flex:1;height:1px;background:#2a2722;"></div>
+          </div>
+          <p style="font-size:14.5px;line-height:1.65;color:#CBC5BB;margin:0;">{{ rv.tradeoffs }}</p>
+        </section>
+
+        <!-- What to learn -->
+        <section style="margin-bottom:32px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+            <h3 style="font-size:15px;font-weight:600;color:#EDEAE4;margin:0;">What to learn next</h3>
+            <div style="flex:1;height:1px;background:#2a2722;"></div>
+          </div>
+          <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px;">
+            <sc-for list="{{ rv.whatToLearnNext }}" as="w" hint-placeholder-count="3">
+              <li style="display:flex;gap:11px;font-size:13.5px;line-height:1.55;color:#C5BFB5;">
+                <span style="flex:none;color:#6a6459;font-family:'JetBrains Mono',monospace;font-size:12px;margin-top:1px;">→</span>
+                <span>{{ w }}</span>
+              </li>
+            </sc-for>
+          </ul>
+        </section>
+
+        <!-- Saved to notes -->
+        <div style="background:linear-gradient(135deg,rgba(124,108,255,0.1),rgba(124,108,255,0.04));border:1px solid rgba(124,108,255,0.3);border-radius:14px;padding:22px 24px;">
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:14px;">
+            <span style="width:18px;height:18px;border-radius:50%;background:#7c6cff;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700;">✓</span>
+            <span style="font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#C9A9F0;">Saved to your notes</span>
+          </div>
+          <div style="background:#1c1a22;border:1px solid rgba(124,108,255,0.18);border-radius:11px;padding:18px 20px;margin-bottom:14px;">
+            <div style="font-size:15px;font-weight:600;color:#EDEAE4;margin-bottom:10px;">{{ rv.noteTitle }}</div>
+            {{ rv.noteEl }}
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+            <div style="display:flex;flex-wrap:wrap;gap:7px;">
+              <sc-for list="{{ rv.weakTags }}" as="tag" hint-placeholder-count="1">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#C9A9F0;background:rgba(124,108,255,0.12);border:1px solid rgba(124,108,255,0.3);border-radius:6px;padding:3px 9px;">{{ tag }}</span>
+              </sc-for>
+            </div>
+            <button onClick="{{ goNotes }}" style="font-size:13px;color:#9486ff;background:none;border:none;cursor:pointer;font-weight:500;padding:0;">Open Notes archive →</button>
+          </div>
+        </div>
+
+      </div>
+      </sc-if>
+      </sc-if>
+
+      <sc-if value="{{ taskNotFound }}" hint-placeholder-val="{{ false }}">
+      <div style="border:1px dashed #34302a;border-radius:13px;padding:60px;text-align:center;">
+        <div style="font-size:17px;color:#C9C3B8;margin-bottom:8px;">Task not found</div>
+        <div style="font-size:13.5px;color:#8a8378;margin-bottom:20px;">It may have been removed. Head back and generate a new one.</div>
+        <button onClick="{{ goHome }}" style="background:#7c6cff;color:#fff;border:none;border-radius:9px;padding:10px 20px;font-size:13.5px;font-weight:600;cursor:pointer;">Back to Dashboard</button>
+      </div>
+      </sc-if>
+    </div>
+    </sc-if>
+
+    <!-- ============ NOTES ============ -->
+    <sc-if value="{{ isNotes }}" hint-placeholder-val="{{ false }}">
+    <div>
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:28px;">
+        <div>
+          <h1 style="font-size:24px;font-weight:600;color:#EDEAE4;margin:0 0 5px;letter-spacing:-0.02em;">Notes</h1>
+          <p style="font-size:14px;color:#948e83;margin:0;">Distilled lessons from your reviews.</p>
+        </div>
+        <div style="position:relative;">
+          <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#6a6459;font-size:13px;">⌕</span>
+          <input value="{{ search }}" onInput="{{ onSearch }}" placeholder="Search notes & tags…" style="width:260px;background:#1e1b19;border:1px solid #34302c;border-radius:9px;padding:9px 13px 9px 32px;color:#EDEAE4;font-size:13.5px;outline:none;transition:all 0.12s;" style-focus="border-color:#7c6cff;box-shadow:0 0 0 3px rgba(124,108,255,0.15);" />
+        </div>
+      </div>
+
+      <sc-if value="{{ hasNotesResults }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <sc-for list="{{ notesFiltered }}" as="n" hint-placeholder-count="2">
+          <div style="background:#1e1b19;border:1px solid #2e2a25;border-radius:13px;padding:22px 24px;">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:14px;margin-bottom:13px;">
+              <h3 style="font-size:16px;font-weight:600;color:#EDEAE4;margin:0;letter-spacing:-0.01em;">{{ n.title }}</h3>
+              <span style="flex:none;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#7a746a;">{{ n.date }}</span>
+            </div>
+            <div style="margin-bottom:15px;">{{ n.contentEl }}</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+              <div style="display:flex;flex-wrap:wrap;gap:7px;">
+                <sc-for list="{{ n.tags }}" as="tag" hint-placeholder-count="2">
+                  <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#C9A9F0;background:rgba(124,108,255,0.1);border:1px solid rgba(124,108,255,0.26);border-radius:6px;padding:3px 9px;white-space:nowrap;">{{ tag }}</span>
+                </sc-for>
+              </div>
+              <sc-if value="{{ n.hasTask }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ n.onView }}" style="font-size:13px;color:#9486ff;background:none;border:none;cursor:pointer;font-weight:500;padding:0;">View task →</button>
+              </sc-if>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ notesNoResults }}" hint-placeholder-val="{{ false }}">
+      <div style="border:1px dashed #34302a;border-radius:13px;padding:50px;text-align:center;color:#8a8378;font-size:14px;">
+        No notes match <span style="color:#C9C3B8;font-family:'JetBrains Mono',monospace;">"{{ search }}"</span>.
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ notesEmpty }}" hint-placeholder-val="{{ false }}">
+      <div style="border:1px dashed #34302a;border-radius:13px;padding:60px;text-align:center;">
+        <div style="font-size:16px;color:#C9C3B8;margin-bottom:8px;">No notes yet</div>
+        <div style="font-size:13.5px;color:#8a8378;">Submit a task for review and a note is created automatically.</div>
+      </div>
+      </sc-if>
+    </div>
+    </sc-if>
+
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    let idc = 1;
+    const mk = (def, status) => ({
+      id: def.key + '-' + (idc++),
+      defKey: def.key,
+      title: def.title,
+      taskType: def.taskType,
+      taskTypeLabel: def.taskTypeLabel,
+      language: def.language,
+      fileName: def.fileName,
+      testable: def.testable,
+      statement: def.statement,
+      constraints: def.constraints,
+      hints: def.hints,
+      starterCode: def.starterCode,
+      review: def.review,
+      status: status,
+    });
+    this.DEFS = this.buildDefs();
+    const cooldown = mk(this.DEFS.cooldown, 'open');
+    const registry = mk(this.DEFS.registry, 'reviewed');
+    const leak = mk(this.DEFS.leak, 'reviewed');
+    this._idc = idc;
+
+    this.state = {
+      route: 'dashboard',
+      bannerDismissed: false,
+      profile: {
+        stack: 'roblox + knit + luau',
+        level: 'middle',
+        goals: 'Get sharper at networking / replication design and edge-case handling.',
+        weakAreas: ['edge-cases', 'di-lifecycle'],
+      },
+      tasks: [registry, leak, cooldown],
+      notes: [
+        { title: this.DEFS.registry.review.noteTitle, content: this.DEFS.registry.review.noteMarkdown, tags: this.DEFS.registry.review.weakAreaTags, date: 'Jun 17', taskId: registry.id },
+        { title: this.DEFS.leak.review.noteTitle, content: this.DEFS.leak.review.noteMarkdown, tags: this.DEFS.leak.review.weakAreaTags, date: 'Jun 20', taskId: leak.id },
+      ],
+      solutions: {},
+      currentTaskId: null,
+      generating: null,
+      reviewing: false,
+      hintsOpen: false,
+      search: '',
+      form: { stack: '', level: 'middle', goals: '' },
+      stackError: false,
+      savedFlash: false,
+    };
+    this._gutter = null;
+    this._ta = null;
+  }
+
+  // ---------- markdown ----------
+  md(src) {
+    if (!src) return null;
+    const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const inline = t => {
+      t = esc(t);
+      t = t.replace(/`([^`]+)`/g, '<code>$1</code>');
+      t = t.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      t = t.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+      return t;
+    };
+    const lines = src.replace(/\r/g, '').split('\n');
+    let html = '', i = 0;
+    while (i < lines.length) {
+      let line = lines[i];
+      if (/^```/.test(line)) {
+        i++; let code = [];
+        while (i < lines.length && !/^```/.test(lines[i])) { code.push(lines[i]); i++; }
+        i++;
+        html += '<pre><code>' + esc(code.join('\n')) + '</code></pre>';
+        continue;
+      }
+      if (/^\s*$/.test(line)) { i++; continue; }
+      const h = line.match(/^(#{1,4})\s+(.*)/);
+      if (h) { const n = h[1].length; html += '<h' + n + '>' + inline(h[2]) + '</h' + n + '>'; i++; continue; }
+      if (/^(-{3,}|\*{3,})\s*$/.test(line)) { html += '<hr/>'; i++; continue; }
+      if (/^\s*>\s?/.test(line)) {
+        let q = [];
+        while (i < lines.length && /^\s*>\s?/.test(lines[i])) { q.push(lines[i].replace(/^\s*>\s?/, '')); i++; }
+        html += '<blockquote>' + inline(q.join(' ')) + '</blockquote>';
+        continue;
+      }
+      if (/^\s*\|.*\|\s*$/.test(line) && i + 1 < lines.length && /-/.test(lines[i + 1]) && /^\s*\|?[\s:|-]+\|?\s*$/.test(lines[i + 1])) {
+        const pr = r => r.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim());
+        const head = pr(line); i += 2; let rows = [];
+        while (i < lines.length && /^\s*\|.*\|\s*$/.test(lines[i])) { rows.push(pr(lines[i])); i++; }
+        html += '<table><thead><tr>' + head.map(c => '<th>' + inline(c) + '</th>').join('') + '</tr></thead><tbody>' +
+          rows.map(r => '<tr>' + r.map(c => '<td>' + inline(c) + '</td>').join('') + '</tr>').join('') + '</tbody></table>';
+        continue;
+      }
+      if (/^\s*[-*]\s+/.test(line)) {
+        let items = [];
+        while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) { items.push(inline(lines[i].replace(/^\s*[-*]\s+/, ''))); i++; }
+        html += '<ul>' + items.map(x => '<li>' + x + '</li>').join('') + '</ul>';
+        continue;
+      }
+      if (/^\s*\d+\.\s+/.test(line)) {
+        let items = [];
+        while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) { items.push(inline(lines[i].replace(/^\s*\d+\.\s+/, ''))); i++; }
+        html += '<ol>' + items.map(x => '<li>' + x + '</li>').join('') + '</ol>';
+        continue;
+      }
+      let para = [line]; i++;
+      while (i < lines.length && !/^\s*$/.test(lines[i]) && !/^(#{1,4}\s|```|\s*[-*]\s|\s*\d+\.\s|\s*\||\s*>)/.test(lines[i])) { para.push(lines[i]); i++; }
+      html += '<p>' + inline(para.join(' ')) + '</p>';
+    }
+    return React.createElement('div', { className: 'md', dangerouslySetInnerHTML: { __html: html } });
+  }
+
+  // ---------- nav ----------
+  go(route) { this.setState({ route, savedFlash: false }); window.scrollTo(0, 0); }
+  goHome = () => this.go('dashboard');
+  goProfile = () => {
+    const p = this.state.profile;
+    this.setState({ route: 'profile', stackError: false, savedFlash: false, form: { stack: p.stack, level: p.level, goals: p.goals } });
+    window.scrollTo(0, 0);
+  };
+  goNotes = () => this.go('notes');
+  goTask = (id) => {
+    const s = { ...this.state.solutions };
+    const task = this.state.tasks.find(t => t.id === id);
+    if (task && s[id] === undefined) s[id] = task.starterCode;
+    this.setState({ route: 'task', currentTaskId: id, solutions: s, reviewing: false, hintsOpen: false });
+    window.scrollTo(0, 0);
+  };
+  dismissBanner = () => this.setState({ bannerDismissed: true });
+
+  // ---------- generate ----------
+  generate = (type) => {
+    if (this.state.generating) return;
+    this.setState({ generating: type });
+    setTimeout(() => {
+      const pool = {
+        'mini-feature': ['cooldown', 'replication'],
+        'system-design': ['registry'],
+        'debug-refactor': ['leak'],
+      };
+      let key;
+      if (type === 'surprise') {
+        const all = ['cooldown', 'replication', 'registry', 'leak'];
+        key = all[Math.floor(Math.random() * all.length)];
+      } else {
+        const opts = pool[type];
+        key = opts[Math.floor(Math.random() * opts.length)];
+      }
+      const def = this.DEFS[key];
+      const task = {
+        id: def.key + '-' + (this._idc++),
+        defKey: def.key, title: def.title, taskType: def.taskType, taskTypeLabel: def.taskTypeLabel,
+        language: def.language, fileName: def.fileName, testable: def.testable,
+        statement: def.statement, constraints: def.constraints, hints: def.hints,
+        starterCode: def.starterCode, review: def.review, status: 'open',
+      };
+      const s = { ...this.state.solutions }; s[task.id] = task.starterCode;
+      this.setState(st => ({ tasks: [...st.tasks, task], solutions: s, generating: null, route: 'task', currentTaskId: task.id, reviewing: false, hintsOpen: false }));
+      window.scrollTo(0, 0);
+    }, 1250);
+  };
+
+  // ---------- editor ----------
+  onCode = (e) => {
+    const v = e.target.value;
+    this.setState(st => ({ solutions: { ...st.solutions, [st.currentTaskId]: v } }));
+  };
+  onEditorKey = (e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const ta = e.target, s = ta.selectionStart, en = ta.selectionEnd, v = ta.value;
+      const nv = v.slice(0, s) + '    ' + v.slice(en);
+      this.setState(st => ({ solutions: { ...st.solutions, [st.currentTaskId]: nv } }), () => {
+        ta.selectionStart = ta.selectionEnd = s + 4;
+      });
+    }
+  };
+  onEditorScroll = (e) => { if (this._gutter) this._gutter.scrollTop = e.target.scrollTop; };
+
+  // ---------- submit / review ----------
+  submit = () => {
+    if (this.state.reviewing) return;
+    this.setState({ reviewing: true });
+    setTimeout(() => {
+      const t = this.state.tasks.find(x => x.id === this.state.currentTaskId);
+      if (!t) { this.setState({ reviewing: false }); return; }
+      const rv = t.review;
+      this.setState(st => {
+        const tasks = st.tasks.map(x => x.id === t.id ? { ...x, status: 'reviewed' } : x);
+        const weak = [...st.profile.weakAreas];
+        rv.weakAreaTags.forEach(tg => { if (!weak.includes(tg)) weak.push(tg); });
+        let notes = st.notes;
+        if (!notes.some(n => n.taskId === t.id)) {
+          notes = [...notes, { title: rv.noteTitle, content: rv.noteMarkdown, tags: rv.weakAreaTags, date: 'Today', taskId: t.id }];
+        }
+        return { tasks, notes, reviewing: false, profile: { ...st.profile, weakAreas: weak } };
+      });
+    }, 1600);
+  };
+
+  // ---------- profile form ----------
+  onStack = (e) => this.setState({ form: { ...this.state.form, stack: e.target.value }, stackError: false });
+  onGoals = (e) => this.setState({ form: { ...this.state.form, goals: e.target.value } });
+  setLevel = (lv) => this.setState({ form: { ...this.state.form, level: lv } });
+  setPreset = (val) => this.setState({ form: { ...this.state.form, stack: val }, stackError: false });
+  saveProfile = () => {
+    const f = this.state.form;
+    if (!f.stack.trim()) { this.setState({ stackError: true }); return; }
+    this.setState({ profile: { ...this.state.profile, stack: f.stack.trim(), level: f.level, goals: f.goals.trim() }, savedFlash: true });
+    setTimeout(() => { this.go('dashboard'); }, 650);
+  };
+
+  onSearch = (e) => this.setState({ search: e.target.value });
+
+  toggleHints = () => this.setState(st => ({ hintsOpen: !st.hintsOpen }));
+
+  // ---------- style helpers ----------
+  navStyle(active) {
+    return active
+      ? { fontSize: '13.5px', fontWeight: 500, color: '#EDEAE4', background: '#2a2621', border: 'none', borderRadius: '8px', padding: '7px 13px', cursor: 'pointer' }
+      : { fontSize: '13.5px', fontWeight: 500, color: '#948e83', background: 'none', border: 'none', borderRadius: '8px', padding: '7px 13px', cursor: 'pointer' };
+  }
+  statusBadge(status) {
+    const base = { fontFamily: "'JetBrains Mono',monospace", fontSize: '11px', fontWeight: 600, letterSpacing: '0.04em', borderRadius: '6px', padding: '3px 9px', flex: 'none', textTransform: 'uppercase', display: 'inline-flex', alignItems: 'center', gap: '5px' };
+    if (status === 'reviewed') return { ...base, color: '#6fd6b3', background: 'rgba(89,194,160,0.12)', border: '1px solid rgba(89,194,160,0.28)' };
+    return { ...base, color: '#9b958a', background: '#26231e', border: '1px solid #38332c' };
+  }
+  verifBadge(testable) {
+    const base = { fontFamily: "'JetBrains Mono',monospace", fontSize: '11.5px', fontWeight: 500, borderRadius: '6px', padding: '3px 9px' };
+    return testable
+      ? { ...base, color: '#6fd6b3', background: 'rgba(89,194,160,0.1)', border: '1px solid rgba(89,194,160,0.26)' }
+      : { ...base, color: '#9b958a', background: '#221f1d', border: '1px solid #34302c' };
+  }
+  verdictBadge(v) {
+    const base = { fontFamily: "'JetBrains Mono',monospace", fontSize: '13px', fontWeight: 600, letterSpacing: '0.02em', borderRadius: '8px', padding: '6px 14px', textTransform: 'uppercase' };
+    if (v === 'pass') return { ...base, color: '#7ad9b8', background: 'rgba(89,194,160,0.14)', border: '1px solid rgba(89,194,160,0.4)' };
+    if (v === 'fail') return { ...base, color: '#e89490', background: 'rgba(224,116,110,0.14)', border: '1px solid rgba(224,116,110,0.4)' };
+    return { ...base, color: '#ecc07f', background: 'rgba(227,168,87,0.14)', border: '1px solid rgba(227,168,87,0.4)' };
+  }
+  sevAccent(sev) { return sev === 'blocker' ? '#e0746e' : sev === 'major' ? '#e3a857' : '#7c6cff'; }
+  sevTag(sev) {
+    const base = { fontFamily: "'JetBrains Mono',monospace", fontSize: '10.5px', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', borderRadius: '5px', padding: '2px 7px', flex: 'none', height: 'fit-content', marginTop: '1px' };
+    if (sev === 'blocker') return { ...base, color: '#e89490', background: 'rgba(224,116,110,0.14)', border: '1px solid rgba(224,116,110,0.3)' };
+    if (sev === 'major') return { ...base, color: '#ecc07f', background: 'rgba(227,168,87,0.14)', border: '1px solid rgba(227,168,87,0.3)' };
+    return { ...base, color: '#A89FB8', background: 'rgba(124,108,255,0.12)', border: '1px solid rgba(124,108,255,0.28)' };
+  }
+  ringStyle(score) {
+    const color = score >= 80 ? '#59c2a0' : score >= 55 ? '#e3a857' : '#e0746e';
+    const deg = Math.round(score * 3.6);
+    return `conic-gradient(${color} ${deg}deg, #2c2823 ${deg}deg)`;
+  }
+  levelLabel(l) { return l.charAt(0).toUpperCase() + l.slice(1); }
+
+  renderVals() {
+    const st = this.state;
+    const route = st.route;
+    const showBanner = !st.bannerDismissed;
+
+    // generate cards
+    const cardDefs = [
+      { key: 'mini-feature', title: 'Mini-feature', desc: 'implement a small realistic feature', shape: 'square', accent: false },
+      { key: 'system-design', title: 'System design', desc: 'architecture & trade-offs', shape: 'circle', accent: false },
+      { key: 'debug-refactor', title: 'Debug / refactor', desc: 'fix broken or messy code', shape: 'diamond', accent: false },
+      { key: 'surprise', title: 'Surprise me', desc: 'auto-picks a type for you', shape: 'spark', accent: true },
+    ];
+    const busy = !!st.generating;
+    const genCards = cardDefs.map(c => {
+      const loading = st.generating === c.key;
+      const shapeBase = { width: '22px', height: '22px', flex: 'none', display: 'inline-block' };
+      let shapeStyle;
+      if (c.shape === 'square') shapeStyle = { ...shapeBase, borderRadius: '6px', border: '2px solid #8a8378' };
+      else if (c.shape === 'circle') shapeStyle = { ...shapeBase, borderRadius: '50%', border: '2px solid #8a8378' };
+      else if (c.shape === 'diamond') shapeStyle = { ...shapeBase, width: '17px', height: '17px', borderRadius: '4px', border: '2px solid #8a8378', transform: 'rotate(45deg)' };
+      else shapeStyle = { ...shapeBase, width: '17px', height: '17px', borderRadius: '4px', background: 'linear-gradient(135deg,#9486ff,#6a59e0)', transform: 'rotate(45deg)', boxShadow: '0 2px 10px rgba(124,108,255,0.4)' };
+      const base = {
+        textAlign: 'left', cursor: busy ? 'default' : 'pointer', padding: '17px 18px', borderRadius: '13px',
+        opacity: busy && !loading ? 0.5 : 1, transition: 'all 0.14s',
+        background: c.accent ? 'linear-gradient(160deg,rgba(124,108,255,0.14),rgba(124,108,255,0.05))' : '#211e1b',
+        border: c.accent ? '1px solid rgba(124,108,255,0.4)' : '1px solid #322e29',
+      };
+      const hover = busy ? base : { ...base, transform: 'translateY(-2px)', borderColor: c.accent ? 'rgba(124,108,255,0.6)' : '#46403a', background: c.accent ? 'linear-gradient(160deg,rgba(124,108,255,0.2),rgba(124,108,255,0.07))' : '#262320' };
+      return { key: c.key, title: c.title, desc: c.desc, loading, disabled: busy, style: base, hoverStyle: hover, shapeStyle, onClick: () => this.generate(c.key) };
+    });
+
+    // recent tasks (newest first)
+    const recentTasks = [...st.tasks].reverse().map(t => ({
+      id: t.id, title: t.title,
+      meta: t.taskTypeLabel + '  ·  ' + t.language,
+      statusLabel: t.status, statusStyle: this.statusBadge(t.status),
+      onClick: () => this.goTask(t.id),
+    }));
+
+    // profile form
+    const presets = [
+      { label: 'roblox + flamework + roblox-ts', val: 'roblox + flamework + roblox-ts' },
+      { label: 'roblox + knit + luau', val: 'roblox + knit + luau' },
+      { label: 'roblox + luau (vanilla)', val: 'roblox + luau (vanilla)' },
+    ].map(p => ({ label: p.label, onClick: () => this.setPreset(p.val) }));
+    const levelOpts = ['junior', 'middle', 'senior'].map(l => {
+      const active = st.form.level === l;
+      return {
+        key: l, label: this.levelLabel(l), onClick: () => this.setLevel(l),
+        style: active
+          ? { fontSize: '13.5px', fontWeight: 500, color: '#fff', background: '#7c6cff', border: 'none', borderRadius: '7px', padding: '7px 18px', cursor: 'pointer' }
+          : { fontSize: '13.5px', fontWeight: 500, color: '#A89FB8', background: 'none', border: 'none', borderRadius: '7px', padding: '7px 18px', cursor: 'pointer' },
+      };
+    });
+    const inputBase = { width: '100%', background: '#1e1b19', border: '1px solid #34302c', borderRadius: '10px', padding: '12px 14px', color: '#EDEAE4', fontSize: '14px', outline: 'none', transition: 'all 0.12s', fontFamily: "'JetBrains Mono',monospace" };
+    const goalsBase = { width: '100%', background: '#1e1b19', border: '1px solid #34302c', borderRadius: '10px', padding: '12px 14px', color: '#EDEAE4', fontSize: '14px', outline: 'none', transition: 'all 0.12s', resize: 'vertical', lineHeight: '1.5', fontFamily: "'Inter',sans-serif" };
+
+    // current task
+    const t = st.tasks.find(x => x.id === st.currentTaskId);
+    let taskVM = null, statementEl = null, constraints = [], hints = [], rv = null;
+    let code = '', lineNumbersText = '1';
+    if (t) {
+      taskVM = {
+        title: t.title, taskTypeLabel: t.taskTypeLabel, language: t.language, fileName: t.fileName,
+        verifLabel: t.testable ? 'auto-testable' : 'review-only', verifStyle: this.verifBadge(t.testable),
+      };
+      statementEl = this.md(t.statement);
+      constraints = t.constraints;
+      hints = t.hints;
+      code = st.solutions[t.id] !== undefined ? st.solutions[t.id] : t.starterCode;
+      lineNumbersText = Array.from({ length: code.split('\n').length }, (_, i) => i + 1).join('\n');
+      if (t.status === 'reviewed' && t.review) {
+        const r = t.review;
+        rv = {
+          scorePercent: r.scorePercent, ringStyle: this.ringStyle(r.scorePercent),
+          verdictLabel: r.verdict, verdictStyle: this.verdictBadge(r.verdict),
+          verdictNote: r.verdict === 'pass' ? 'Solid — ship it with the tweaks below.' : r.verdict === 'fail' ? 'Not there yet — rework the basics.' : 'Close — a few things to sharpen.',
+          correctnessSummary: r.correctnessSummary,
+          issues: r.issues.map(is => ({ sevLabel: is.severity, description: is.description, tagStyle: this.sevTag(is.severity), accent: this.sevAccent(is.severity) })),
+          idiomaticSummary: r.idiomaticSummary, idiomaticSuggestions: r.idiomaticSuggestions,
+          tradeoffs: r.tradeoffs, whatToLearnNext: r.whatToLearnNext,
+          noteTitle: r.noteTitle, noteEl: this.md(r.noteMarkdown), weakTags: r.weakAreaTags,
+        };
+      }
+    }
+    const reviewed = !!(t && t.status === 'reviewed');
+    const submitLabel = st.reviewing ? 'Reviewing…' : reviewed ? 'Re-submit for review' : 'Submit for review';
+    const submitBase = { width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '9px', background: st.reviewing ? '#5a4fb0' : '#7c6cff', color: '#fff', border: 'none', borderRadius: '10px', padding: '13px', fontSize: '14.5px', fontWeight: 600, cursor: st.reviewing ? 'default' : 'pointer', boxShadow: '0 6px 20px rgba(124,108,255,0.32)', transition: 'all 0.12s' };
+    const submitHover = st.reviewing ? submitBase : { ...submitBase, background: '#8d7eff' };
+
+    // notes
+    const q = st.search.trim().toLowerCase();
+    let notesAll = [...st.notes].reverse();
+    let notesFiltered = notesAll;
+    if (q) notesFiltered = notesAll.filter(n =>
+      n.title.toLowerCase().includes(q) || n.content.toLowerCase().includes(q) || n.tags.some(tg => tg.toLowerCase().includes(q))
+    );
+    const notesVM = notesFiltered.map(n => ({
+      title: n.title, date: n.date, contentEl: this.md(n.content), tags: n.tags,
+      hasTask: !!n.taskId, onView: () => n.taskId && this.goTask(n.taskId),
+    }));
+
+    return {
+      // nav
+      goHome: this.goHome, goProfile: this.goProfile, goNotes: this.goNotes,
+      navDashStyle: this.navStyle(route === 'dashboard'),
+      navProfStyle: this.navStyle(route === 'profile'),
+      navNotesStyle: this.navStyle(route === 'notes'),
+      isDashboard: route === 'dashboard', isProfile: route === 'profile', isTask: route === 'task', isNotes: route === 'notes',
+      // dashboard
+      showBanner, dismissBanner: this.dismissBanner,
+      profileStack: st.profile.stack, profileLevel: this.levelLabel(st.profile.level),
+      profileGoals: st.profile.goals, hasGoals: !!st.profile.goals,
+      weakAreas: st.profile.weakAreas, hasWeak: st.profile.weakAreas.length > 0, noWeak: st.profile.weakAreas.length === 0,
+      genCards, generateBusy: busy,
+      recentTasks, hasTasks: st.tasks.length > 0, noTasks: st.tasks.length === 0,
+      // profile
+      formStack: st.form.stack, formGoals: st.form.goals, stackError: st.stackError,
+      onStack: this.onStack, onGoals: this.onGoals, presets, levelOpts,
+      stackInputStyle: inputBase, goalsInputStyle: goalsBase,
+      saveProfile: this.saveProfile, savedFlash: st.savedFlash,
+      // task
+      taskFound: !!t, taskNotFound: st.route === 'task' && !t,
+      t: taskVM, statementEl, constraints, hints,
+      hintsOpen: st.hintsOpen, hintsLabel: st.hintsOpen ? 'Hide hints' : 'Show hints (' + hints.length + ')',
+      hintsChevStyle: { fontSize: '16px', transition: 'transform 0.18s', transform: st.hintsOpen ? 'rotate(180deg)' : 'none', display: 'inline-block' },
+      toggleHints: this.toggleHints,
+      solutionCode: code, lineNumbersText,
+      onCode: this.onCode, onEditorKey: this.onEditorKey, onEditorScroll: this.onEditorScroll,
+      gutterRef: (el) => { this._gutter = el; }, taRef: (el) => { this._ta = el; },
+      submitLabel, reviewing: st.reviewing, submit: this.submit, submitStyle: submitBase, submitHoverStyle: submitHover,
+      showReview: reviewed && !st.reviewing, rv,
+      // notes
+      search: st.search, onSearch: this.onSearch, notesFiltered: notesVM,
+      hasNotesResults: notesVM.length > 0,
+      notesNoResults: st.notes.length > 0 && notesVM.length === 0 && !!q,
+      notesEmpty: st.notes.length === 0,
+    };
+  }
+
+  // ---------- task library ----------
+  buildDefs() {
+    return {
+      cooldown: {
+        key: 'cooldown', taskType: 'mini-feature', taskTypeLabel: 'mini-feature', language: 'luau', fileName: 'CooldownManager.luau', testable: false,
+        title: 'Implement a debounced cooldown manager',
+        statement: `## Goal
+Build a small **cooldown manager** for a Roblox combat system. Abilities ask it whether they're ready and start a cooldown when used.
+
+The manager is a single shared module. Many abilities — each with its own duration — use the same instance.
+
+### API
+\`\`\`lua
+local cd = CooldownManager.new()
+cd:start("dash", 3)   -- 3-second cooldown
+cd:isReady("dash")    -- false now, true after 3s
+cd:timeLeft("dash")   -- seconds remaining, 0 when ready
+\`\`\`
+
+Keys are arbitrary strings; durations are seconds (numbers).`,
+        constraints: [
+          'No external dependencies — pure Luau.',
+          'isReady(key) returns true for a key that was never started.',
+          'timeLeft never returns a negative number.',
+          'Starting an active cooldown restarts it with the new duration.',
+          'O(1) per call — don\u2019t iterate every key on each check.',
+        ],
+        hints: [
+          'os.clock() is monotonic — prefer it over tick() for durations.',
+          'Store when the cooldown ends, not when it started.',
+          'Lazy cleanup: you don\u2019t need a Heartbeat loop to expire keys.',
+        ],
+        starterCode: `local CooldownManager = {}
+CooldownManager.__index = CooldownManager
+
+function CooldownManager.new()
+	return setmetatable({ active = {} }, CooldownManager)
+end
+
+function CooldownManager:start(key, duration)
+	-- TODO: begin a cooldown for \`key\`
+end
+
+function CooldownManager:isReady(key)
+	-- TODO
+	return true
+end
+
+function CooldownManager:timeLeft(key)
+	-- TODO
+	return 0
+end
+
+return CooldownManager`,
+        review: {
+          verdict: 'needs-work', scorePercent: 65,
+          correctnessSummary: 'The core logic is sound and the API matches the spec. One edge case around expiry will produce a subtle off-by-a-frame bug under load.',
+          issues: [{ severity: 'minor', description: 'Consider the expiry edge case: when timeLeft hits exactly 0, isReady should already report true. Comparing endTime > now instead of >= leaves a key "ready but not ready" for one frame.' }],
+          idiomaticSummary: 'Idiomatic Luau overall — setmetatable OOP is the right call. A couple of small tightenings would make it read like framework code.',
+          idiomaticSuggestions: [
+            'Use os.clock() rather than tick() for durations — it\u2019s monotonic and unaffected by clock changes.',
+            'Add --!strict and an exported CooldownManager type so callers get autocomplete.',
+            'Return early in timeLeft for unknown keys instead of indexing the table twice.',
+          ],
+          tradeoffs: 'Storing end timestamps keeps every call O(1) and avoids a Heartbeat loop, at the cost of never proactively freeing keys. For a handful of abilities that\u2019s the right trade; for thousands of churning keys you\u2019d add lazy deletion on read.',
+          whatToLearnNext: [
+            'Monotonic clocks vs wall-clock time and why it matters for gameplay timers.',
+            'Lazy vs eager expiry strategies for in-memory caches.',
+            'Writing --!strict Luau with exported types.',
+          ],
+          noteTitle: 'Cooldowns: store the end timestamp, not the start',
+          noteMarkdown: `Store **when a cooldown ends** (\`os.clock() + duration\`), not when it started. Then:
+
+- \`isReady(key)\` is just \`now >= endTime\` (or the key is absent).
+- \`timeLeft(key)\` is \`math.max(0, endTime - now)\`.
+
+Use \`os.clock()\` (monotonic), not \`tick()\`. Watch the boundary: compare with \`>=\` so a key reads *ready* the instant it expires, not one frame later.`,
+          weakAreaTags: ['edge-cases'],
+        },
+      },
+      replication: {
+        key: 'replication', taskType: 'mini-feature', taskTypeLabel: 'mini-feature', language: 'luau', fileName: 'HealthReplicator.luau', testable: true,
+        title: 'Build a batched health-bar replicator',
+        statement: `## Goal
+Player health changes constantly. Firing a RemoteEvent on every change floods the network. Build a **replicator** that batches health updates and flushes them once per frame.
+
+### API
+\`\`\`lua
+local rep = HealthReplicator.new(remote)
+rep:set(player, 87)   -- queue an update
+rep:set(player, 84)   -- overwrites the queued value
+-- on Heartbeat: rep:flush() fires one remote with all dirty players
+\`\`\``,
+        constraints: [
+          'Only players whose value changed since the last flush are sent.',
+          'The latest value wins — never send stale intermediate values.',
+          'flush() with nothing dirty fires no remote at all.',
+          'No per-player RemoteEvents — one shared remote.',
+        ],
+        hints: [
+          'Keep a "dirty" set keyed by player.',
+          'Clear the dirty set inside flush(), after building the payload.',
+          'A table of {player = value} is enough — no ordering needed.',
+        ],
+        starterCode: `local HealthReplicator = {}
+HealthReplicator.__index = HealthReplicator
+
+function HealthReplicator.new(remote)
+	return setmetatable({ remote = remote, dirty = {} }, HealthReplicator)
+end
+
+function HealthReplicator:set(player, hp)
+	-- TODO: queue this update
+end
+
+function HealthReplicator:flush()
+	-- TODO: send all dirty players in one remote, then clear
+end
+
+return HealthReplicator`,
+        review: {
+          verdict: 'pass', scorePercent: 84,
+          correctnessSummary: 'Batching works and the latest-value-wins rule holds. The empty-flush guard is in place. Clean, shippable.',
+          issues: [{ severity: 'minor', description: 'flush() builds the payload then iterates again to clear — you can clear in the same pass by reassigning self.dirty = {} after capturing the reference.' }],
+          idiomaticSummary: 'Reads like real Roblox networking code. Good instinct keeping one remote and a dirty set.',
+          idiomaticSuggestions: [
+            'Swap the dirty table reference instead of deleting keys one by one — cheaper and atomic.',
+            'Type the payload as { [Player]: number } so the receiver side stays honest.',
+          ],
+          tradeoffs: 'Per-frame batching trades a frame of latency for a massive drop in remote calls — correct for health bars, wrong for hit-registration where you\u2019d want immediacy.',
+          whatToLearnNext: [
+            'When to batch vs. send immediately (cosmetic vs. authoritative state).',
+            'Unreliable RemoteEvents for high-frequency cosmetic data.',
+          ],
+          noteTitle: 'Batch cosmetic replication; swap the dirty set on flush',
+          noteMarkdown: `For high-frequency **cosmetic** state (health, stamina), queue changes in a dirty set and flush once per \`Heartbeat\`.
+
+- Latest value wins — overwrite, don\u2019t append.
+- On flush: capture the table, set \`self.dirty = {}\`, then send. Avoids a second clearing pass.
+- Skip the remote entirely when nothing is dirty.`,
+          weakAreaTags: ['networking'],
+        },
+      },
+      registry: {
+        key: 'registry', taskType: 'system-design', taskTypeLabel: 'system-design', language: 'typescript', fileName: 'ServiceRegistry.ts', testable: false,
+        title: 'Design a type-safe Knit service registry',
+        statement: `## Context
+Your Knit codebase has ~30 services. Controllers reach for them with \`Knit.GetService("X")\`, which returns \`any\` and blows up at runtime when a name is wrong.
+
+Design a **registry** that gives controllers **typed** access to services and fails at *compile* time, not runtime.
+
+### What to decide
+- How services declare their public contract.
+- How a controller asks for one and gets full types back.
+- Where in the Knit lifecycle wiring happens.`,
+        constraints: [
+          'GetService("Nope") must be a compile error, not a runtime one.',
+          'A service\u2019s public surface is explicit — internals stay private.',
+          'No circular import between two services at module-eval time.',
+          'Works with Knit\u2019s KnitInit / KnitStart lifecycle.',
+        ],
+        hints: [
+          'A central interface map keyed by service name gives you the lookup type.',
+          'Depend on the interface, not the concrete service class.',
+          'Resolve other services in KnitStart, never in the constructor.',
+        ],
+        starterCode: `// ServiceRegistry.ts
+// Sketch the registry types here.
+
+interface ServiceMap {
+	// "Inventory": InventoryService;
+}
+
+export function getService<K extends keyof ServiceMap>(
+	name: K,
+): ServiceMap[K] {
+	// TODO
+	return undefined as never;
+}`,
+        review: {
+          verdict: 'pass', scorePercent: 88,
+          correctnessSummary: 'The keyed ServiceMap approach is exactly right — lookups are typed and bad names fail at compile time. Lifecycle separation is clean.',
+          issues: [{ severity: 'minor', description: 'getService called during module evaluation (top-level) can still hit an unregistered service. Gate access behind KnitStart so the registry is fully populated.' }],
+          idiomaticSummary: 'This is how mature Knit/Flamework codebases are wired. Depending on interfaces over concrete classes is the key move.',
+          idiomaticSuggestions: [
+            'Export each service\u2019s public interface separately from its implementation.',
+            'Make ServiceMap the single source of truth; generate it rather than hand-maintaining.',
+            'Forbid getService in constructors via a lint rule — only in KnitStart.',
+          ],
+          tradeoffs: 'A central ServiceMap couples every service name into one file — great for safety, a minor merge-conflict magnet. Worth it at 30 services; overkill at 3.',
+          whatToLearnNext: [
+            'Dependency-inversion in DI frameworks: depend on contracts, not implementations.',
+            'Init vs. Start lifecycle phases and why cross-service calls belong in Start.',
+            'TypeScript keyed-lookup types for safe registries.',
+          ],
+          noteTitle: 'Knit services: depend on contracts, do cross-service work in KnitStart',
+          noteMarkdown: `Two rules that fix most Knit DI pain:
+
+1. **Depend on interfaces, not classes.** A keyed \`ServiceMap\` (name → public interface) makes \`getService("Typo")\` a *compile* error.
+2. **Wire in \`KnitStart\`, not the constructor.** In \`KnitInit\` other services may not exist yet; resolving them in \`KnitStart\` avoids init-order and circular-import bugs.`,
+          weakAreaTags: ['di-lifecycle'],
+        },
+      },
+      leak: {
+        key: 'leak', taskType: 'debug-refactor', taskTypeLabel: 'debug-refactor', language: 'luau', fileName: 'EnemySpawner.luau', testable: true,
+        title: 'Fix the leaking RunService connection',
+        statement: `## The bug
+\`EnemySpawner\` connects to \`RunService.Heartbeat\` every time an enemy spawns and **never disconnects**. After a few waves the game drops frames and memory climbs.
+
+Find every leak and make the spawner clean up after itself.
+
+\`\`\`lua
+function EnemySpawner:spawn()
+	local enemy = template:Clone()
+	RunService.Heartbeat:Connect(function(dt)
+		self:_updateAI(enemy, dt)
+	end)
+	enemy.Parent = workspace
+end
+\`\`\``,
+        constraints: [
+          'Each enemy\u2019s Heartbeat work stops when that enemy dies.',
+          'No connection outlives its enemy.',
+          'destroy() on the spawner tears down everything it owns.',
+          'Behaviour is otherwise unchanged.',
+        ],
+        hints: [
+          ':Connect returns an RBXScriptConnection — capture it.',
+          'Disconnect when the enemy is removed (AncestryChanged or an explicit kill).',
+          'A Janitor/Maid pattern collapses this to one :Add call.',
+        ],
+        starterCode: `local RunService = game:GetService("RunService")
+local EnemySpawner = {}
+EnemySpawner.__index = EnemySpawner
+
+function EnemySpawner.new(template)
+	return setmetatable({ template = template, conns = {} }, EnemySpawner)
+end
+
+function EnemySpawner:spawn()
+	local enemy = self.template:Clone()
+	RunService.Heartbeat:Connect(function(dt)
+		self:_updateAI(enemy, dt)
+	end)
+	enemy.Parent = workspace
+end
+
+return EnemySpawner`,
+        review: {
+          verdict: 'needs-work', scorePercent: 74,
+          correctnessSummary: 'You captured the connection and disconnect on death — the main leak is gone. But the spawner-level destroy() still leaves dangling connections for enemies alive at teardown.',
+          issues: [
+            { severity: 'major', description: 'destroy() doesn\u2019t disconnect connections for currently-alive enemies. Track every connection on the instance and disconnect them all in destroy().' },
+            { severity: 'minor', description: 'AncestryChanged fires for reparents too, not only removal. Guard on enemy:IsDescendantOf(game) being false before cleaning up.' },
+          ],
+          idiomaticSummary: 'The fix is correct in spirit; structurally it wants a Janitor. Manual connection bookkeeping is where leaks creep back in.',
+          idiomaticSuggestions: [
+            'Use a Janitor/Maid per enemy — :Add the connection and the clone, then :Destroy() once.',
+            'Keep a top-level Janitor on the spawner so destroy() is a single :Destroy() call.',
+          ],
+          tradeoffs: 'Manual tables are dependency-free but easy to get wrong; a Janitor adds one small module and removes a whole class of leaks. At any real scale, take the Janitor.',
+          whatToLearnNext: [
+            'The Janitor/Maid pattern and RAII-style cleanup in Luau.',
+            'Which Instance signals actually mean "removed" (Destroying vs AncestryChanged).',
+            'Hunting connection leaks with the MicroProfiler and memory graphs.',
+          ],
+          noteTitle: 'Always capture and disconnect every RBXScriptConnection',
+          noteMarkdown: `\`:Connect\` returns a connection — **own it**. Per object, collect connections (and clones) in a **Janitor/Maid** and \`:Destroy()\` once when the object dies.
+
+- Disconnect on real removal — check \`Destroying\`, or guard \`AncestryChanged\` with \`IsDescendantOf(game)\`.
+- A top-level Janitor makes the parent\u2019s \`destroy()\` a single call that tears down everything it owns.`,
+          weakAreaTags: ['error-handling', 'di-lifecycle'],
+        },
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>

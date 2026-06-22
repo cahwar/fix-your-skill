@@ -1,0 +1,73 @@
+// fix-your-skills data model
+// Stored JSON-ish fields are kept as String (JSON.stringify) for SQLite portability.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id        String   @id @default(cuid())
+  // Free-text skill stack, e.g. "roblox + knit + luau" or "roblox + flamework + roblox-ts"
+  stack     String
+  level     String   @default("middle") // junior | middle | senior
+  goals     String   @default("")
+  // JSON array of weak-area tags accumulated from reviews, e.g. ["error-handling","DI-lifecycle"]
+  weakAreas String   @default("[]")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tasks     Task[]
+}
+
+model Task {
+  id          String       @id @default(cuid())
+  profileId   String
+  profile     Profile      @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  title       String
+  taskType    String // mini-feature | system-design | debug-refactor
+  language    String // luau | typescript
+  statement   String // markdown
+  constraints String   @default("[]") // JSON string[]
+  starterCode String   @default("")
+  rubric      String   @default("[]") // JSON [{id,description,weight}]
+  hints       String   @default("[]") // JSON string[]
+  testable    Boolean  @default(false)
+  status      String   @default("open") // open | reviewed
+  createdAt   DateTime @default(now())
+  submissions Submission[]
+  notes       Note[]
+}
+
+model Submission {
+  id        String   @id @default(cuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  code      String
+  createdAt DateTime @default(now())
+  review    Review?
+}
+
+model Review {
+  id           String     @id @default(cuid())
+  submissionId String     @unique
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  verdict      String // pass | needs-work | fail
+  scorePercent Int        @default(0)
+  // Full structured review as JSON string (correctness, idiomatic, tradeoffs, whatToLearnNext, note)
+  payload      String
+  createdAt    DateTime   @default(now())
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  taskId    String?
+  task      Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  title     String
+  content   String // markdown
+  tags      String   @default("[]") // JSON string[]
+  createdAt DateTime @default(now())
+}
