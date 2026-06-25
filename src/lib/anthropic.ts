@@ -2,13 +2,17 @@ import Anthropic from "@anthropic-ai/sdk";
 import {
   taskJsonSchema,
   reviewJsonSchema,
+  lessonJsonSchema,
   type GeneratedTask,
+  type GeneratedLesson,
   type ReviewResult,
   type TaskType,
+  type LessonFocus,
 } from "./schemas";
 import {
   buildTaskGenerationPrompt,
   buildReviewPrompt,
+  buildLessonGenerationPrompt,
   type ProfileInput,
 } from "./prompts";
 
@@ -57,6 +61,22 @@ export async function generateTask(
   if (!hasApiKey()) return mockTask(profile, taskType);
   const { system, user } = buildTaskGenerationPrompt(profile, taskType);
   return structuredCall<GeneratedTask>({ system, user, schema: taskJsonSchema });
+}
+
+export async function generateLesson(
+  profile: ProfileInput,
+  focus: LessonFocus | "auto",
+  customTopic?: string,
+): Promise<GeneratedLesson> {
+  if (!hasApiKey()) return mockLesson(profile, focus, customTopic);
+  const { system, user } = buildLessonGenerationPrompt(profile, focus, customTopic);
+  // Lessons emit a lot of prose (staged sections) plus a full task, so allow more room.
+  return structuredCall<GeneratedLesson>({
+    system,
+    user,
+    schema: lessonJsonSchema,
+    maxTokens: 16000,
+  });
 }
 
 export async function reviewSubmission(
@@ -110,6 +130,41 @@ function mockTask(profile: ProfileInput, taskType: TaskType): GeneratedTask {
     ],
     hints: ["Store the timestamp when a cooldown ends, not when it starts."],
     testable: true,
+  };
+}
+
+function mockLesson(
+  profile: ProfileInput,
+  focus: LessonFocus | "auto",
+  customTopic?: string,
+): GeneratedLesson {
+  const resolvedFocus: LessonFocus = focus === "auto" ? "applied-skill" : focus;
+  const task = mockTask(profile, "mini-feature");
+  const topic = customTopic || "Debounced cooldowns done right";
+  return {
+    lesson: {
+      topic: `[MOCK] ${topic}`,
+      focus: resolvedFocus,
+      overview:
+        "## [MOCK MODE]\nNo `ANTHROPIC_API_KEY` is set, so this is a sample lesson. " +
+        `With a real key, this teaches a topic scoped to \`${profile.stack}\` and the **${resolvedFocus}** angle, then sets a task on it.`,
+      sections: [
+        {
+          heading: "Stage 1 — The idea",
+          body: "A real lesson explains the concept in stages here, each building on the last.",
+          keyPoints: ["Set ANTHROPIC_API_KEY in .env", "Re-generate to see real, staged content"],
+          codeExample: "",
+        },
+        {
+          heading: "Stage 2 — In practice",
+          body: "This stage would show how the idea looks in your stack, with a worked example.",
+          keyPoints: ["Examples are written in your stack's language"],
+          codeExample: task.starterCode,
+        },
+      ],
+      recap: ["This is sample recap content.", "Add an API key for a real lesson + task."],
+    },
+    task,
   };
 }
 

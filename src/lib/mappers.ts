@@ -1,5 +1,5 @@
 import type { Task, Review } from "@prisma/client";
-import type { RubricItem, ReviewResult } from "./schemas";
+import type { RubricItem, ReviewResult, Lesson } from "./schemas";
 
 export function parseJsonArray<T = string>(value: string): T[] {
   try {
@@ -21,6 +21,7 @@ export interface TaskDTO {
   rubric: RubricItem[];
   hints: string[];
   testable: boolean;
+  lesson: Lesson | null;
   status: string;
   createdAt: string;
 }
@@ -37,9 +38,20 @@ export function taskToDTO(t: Task): TaskDTO {
     rubric: parseJsonArray<RubricItem>(t.rubric),
     hints: parseJsonArray(t.hints),
     testable: t.testable,
+    lesson: parseLesson(t.lesson),
     status: t.status,
     createdAt: t.createdAt.toISOString(),
   };
+}
+
+function parseLesson(value: string | null): Lesson | null {
+  if (!value) return null;
+  try {
+    const parsed = JSON.parse(value) as Lesson;
+    return parsed && Array.isArray(parsed.sections) ? parsed : null;
+  } catch {
+    return null;
+  }
 }
 
 export interface ReviewDTO extends ReviewResult {

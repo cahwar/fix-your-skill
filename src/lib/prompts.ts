@@ -1,4 +1,4 @@
-import type { TaskType } from "./schemas";
+import type { TaskType, LessonFocus } from "./schemas";
 
 export interface ProfileInput {
   stack: string;
@@ -78,6 +78,63 @@ export function buildTaskGenerationPrompt(
     weak,
     `Task type to generate: ${taskType} — ${TASK_TYPE_GUIDANCE[taskType]}`,
     "Generate exactly one task. The language field must match the stack (luau or typescript).",
+  ].join("\n");
+
+  return { system, user };
+}
+
+// --- Guided lessons (Learn → Practice) ---------------------------------------
+
+const LESSON_FOCUS_GUIDANCE: Record<LessonFocus, string> = {
+  "applied-skill":
+    "Teach a concrete, practical skill the developer applies directly in their stack (e.g. a DataStore retry wrapper, a Flamework lifecycle service, a debounced remote handler). Pick something immediately useful, not abstract.",
+  "algorithms-data-structures":
+    "Teach a general algorithm or data structure that pays off in this developer's stack (e.g. spatial partitioning, priority queues for AI, ring buffers, graph traversal for pathing). Ground every example in their language/runtime, not generic pseudocode.",
+  "stack-idioms":
+    "Teach the idioms, conventions and patterns of the developer's specific framework (e.g. Knit service/controller boundaries, Flamework dependency injection & decorators, roblox-ts typing patterns). Emphasize the 'right way' for that framework.",
+  "weak-areas":
+    "Build the lesson around the developer's tracked weak areas so it directly shores them up. Choose the weak area with the most leverage if several are listed.",
+};
+
+export function buildLessonGenerationPrompt(
+  profile: ProfileInput,
+  focus: LessonFocus | "auto",
+  customTopic?: string,
+): { system: string; user: string } {
+  const weak =
+    profile.weakAreas.length > 0
+      ? `Tracked weak areas: ${profile.weakAreas.join(", ")}.`
+      : "No weak-area history yet.";
+
+  const focusLine =
+    focus === "auto"
+      ? "FOCUS: auto — choose whichever angle (applied-skill, algorithms-data-structures, stack-idioms, or weak-areas) is most valuable for this developer right now, and set the lesson's `focus` field to the one you chose."
+      : `FOCUS: ${focus} — ${LESSON_FOCUS_GUIDANCE[focus]} Set the lesson's \`focus\` field to "${focus}".`;
+
+  const topicLine = customTopic
+    ? `The developer explicitly asked to learn: "${customTopic}". Center the lesson on this topic; still classify it under the most fitting \`focus\`.`
+    : "Pick a single, specific, well-scoped topic — not a broad survey.";
+
+  const system = [
+    "You are an expert mentor who first TEACHES a focused topic, then sets a practice task on it.",
+    "The user writes production code with AI daily and wants to keep their hands-on problem-solving sharp, so the lesson must build genuine understanding and the task must require real reasoning — not boilerplate.",
+    "Tailor everything tightly to the user's exact stack and its idioms. If the stack is a Roblox framework (Knit, Flamework, etc.), all explanations, code examples, and the task must use that framework's real conventions.",
+    "LESSON: teach in ordered stages that build on each other — each section has a clear heading, a markdown explanation, a few memorizable keyPoints, and a short illustrative codeExample (empty string only when a snippet truly doesn't help). Keep it focused and progressive; end with a concise recap.",
+    "TASK: produce exactly one practice task that exercises what the lesson just taught — same standards as a standalone task. Set `testable: true` ONLY when the solution is pure logic runnable without the Roblox runtime; framework-coupled or design tasks must be `testable: false`. The task language must match the stack (luau or typescript).",
+    "Calibrate difficulty to the user's level. Make the lesson clear and the task's statement and rubric concrete.",
+    languageDirective(profile.language),
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const user = [
+    `Stack: ${profile.stack}`,
+    `Level: ${profile.level}`,
+    `Goals: ${profile.goals || "(none stated)"}`,
+    weak,
+    focusLine,
+    topicLine,
+    "Return the lesson and one derived practice task.",
   ].join("\n");
 
   return { system, user };

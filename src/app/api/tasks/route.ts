@@ -11,10 +11,15 @@ export async function GET() {
       taskType: true,
       language: true,
       status: true,
+      lesson: true,
       createdAt: true,
     },
   });
   return NextResponse.json({
-    tasks: tasks.map((t) => ({ ...t, createdAt: t.createdAt.toISOString() })),
+    tasks: tasks.map(({ lesson, ...t }) => ({
+      ...t,
+      hasLesson: Boolean(lesson),
+      createdAt: t.createdAt.toISOString(),
+    })),
   });
 }

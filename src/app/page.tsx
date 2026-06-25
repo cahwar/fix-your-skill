@@ -18,8 +18,18 @@ interface TaskRow {
   taskType: string;
   language: string;
   status: string;
+  hasLesson?: boolean;
   createdAt: string;
 }
+
+// Lesson "focus" angles offered in the Learn & practice section.
+const LESSON_FOCUSES = [
+  { key: "auto", label: "Surprise me", desc: "AI picks what's most valuable" },
+  { key: "applied-skill", label: "Applied skill", desc: "a concrete, practical skill" },
+  { key: "algorithms-data-structures", label: "Algorithms & DS", desc: "structures useful for your stack" },
+  { key: "stack-idioms", label: "Stack idioms", desc: "your framework's patterns" },
+  { key: "weak-areas", label: "Weak areas", desc: "shore up tracked gaps" },
+] as const;
 
 const TYPE_LABEL: Record<string, string> = {
   "mini-feature": "Mini-feature",
@@ -75,6 +85,8 @@ export default function Dashboard() {
   const [generating, setGenerating] = useState<string | null>(null);
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lessonFocus, setLessonFocus] = useState<string>("auto");
+  const [lessonTopic, setLessonTopic] = useState("");
 
   async function load() {
     const [p, t, s] = await Promise.all([
@@ -106,6 +118,27 @@ export default function Dashboard() {
       router.push(`/task/${data.task.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to generate");
+      setGenerating(null);
+    }
+  }
+
+  async function generateLesson() {
+    setError(null);
+    setGenerating("lesson");
+    try {
+      const res = await fetch("/api/lessons/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          focus: lessonFocus,
+          topic: lessonTopic.trim() || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed");
+      router.push(`/task/${data.task.id}`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to generate lesson");
       setGenerating(null);
     }
   }
@@ -255,6 +288,85 @@ export default function Dashboard() {
         {error && <p className="text-[var(--color-neg)] text-sm mt-3">{error}</p>}
       </section>
 
+      {/* learn & practice */}
+      <section data-reveal>
+        <div className="flex items-baseline gap-3 mb-3">
+          <h2 className="text-[18px] font-semibold">Learn &amp; practice</h2>
+          <span className="text-[13px] text-[var(--color-text-2)]">
+            study a topic step by step, then solve a task on it
+          </span>
+        </div>
+        <div
+          className="rounded-[14px] p-6"
+          style={{
+            background: "linear-gradient(160deg,rgba(124,108,255,0.10),rgba(124,108,255,0.03))",
+            border: "1px solid rgba(124,108,255,0.34)",
+          }}
+        >
+          <div className="mono text-[11px] uppercase tracking-[0.09em] text-[var(--color-accent-soft)] mb-2.5">
+            Pick a focus
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {LESSON_FOCUSES.map((f) => {
+              const active = lessonFocus === f.key;
+              return (
+                <button
+                  key={f.key}
+                  type="button"
+                  onClick={() => setLessonFocus(f.key)}
+                  disabled={busy}
+                  title={f.desc}
+                  className="text-left rounded-[9px] px-3 py-2 transition-colors disabled:opacity-60"
+                  style={{
+                    background: active ? "rgba(124,108,255,0.16)" : "var(--color-raised)",
+                    border: active
+                      ? "1px solid rgba(124,108,255,0.55)"
+                      : "1px solid var(--color-border-2)",
+                  }}
+                >
+                  <div
+                    className={`text-[13.5px] font-medium ${active ? "text-[var(--color-accent-hi)]" : ""}`}
+                  >
+                    {f.label}
+                  </div>
+                  <div className="text-[11.5px] text-[var(--color-text-2)] mt-0.5">{f.desc}</div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="mono text-[11px] uppercase tracking-[0.09em] text-[var(--color-accent-soft)] mt-5 mb-2">
+            Topic <span className="text-[var(--color-muted)] normal-case tracking-normal">(optional)</span>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2.5">
+            <input
+              value={lessonTopic}
+              onChange={(e) => setLessonTopic(e.target.value)}
+              disabled={busy}
+              placeholder="e.g. retry/backoff for DataStore writes — or leave blank to let AI choose"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !busy) generateLesson();
+              }}
+              className="flex-1 rounded-[10px] px-3.5 py-2.5 text-[14px] outline-none disabled:opacity-60"
+              style={{
+                background: "var(--color-surface)",
+                border: "1px solid var(--color-border-2)",
+                color: "var(--color-text)",
+              }}
+            />
+            <button
+              onClick={generateLesson}
+              disabled={busy}
+              className="rounded-[10px] bg-[var(--color-accent)] text-white font-medium px-5 py-2.5 flex items-center justify-center gap-2 disabled:opacity-70 whitespace-nowrap"
+              style={{ boxShadow: "0 4px 18px rgba(124,108,255,0.30)" }}
+            >
+              {generating === "lesson" && <span className="spinner" />}
+              {generating === "lesson" ? "Building lesson…" : "Generate lesson →"}
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* recent tasks */}
       <section data-reveal>
         <h2 className="text-[18px] font-semibold mb-3">Recent tasks</h2>
@@ -275,7 +387,21 @@ export default function Dashboard() {
                 style={i > 0 ? { borderTop: "1px solid var(--color-border-soft)" } : undefined}
               >
                 <div className="min-w-0">
-                  <div className="text-[14.5px] font-medium truncate">{t.title}</div>
+                  <div className="flex items-center gap-2">
+                    {t.hasLesson && (
+                      <span
+                        className="mono text-[10px] font-semibold uppercase tracking-[0.05em] rounded-[5px] px-1.5 py-[2px] flex-none"
+                        style={{
+                          color: "#c9a9f0",
+                          background: "rgba(124,108,255,0.12)",
+                          border: "1px solid rgba(124,108,255,0.30)",
+                        }}
+                      >
+                        Lesson
+                      </span>
+                    )}
+                    <div className="text-[14.5px] font-medium truncate">{t.title}</div>
+                  </div>
                   <div className="mono text-[12px] text-[var(--color-muted)] mt-0.5">
                     {TYPE_LABEL[t.taskType] ?? t.taskType}  ·  {t.language}
                   </div>

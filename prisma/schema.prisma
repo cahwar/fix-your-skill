@@ -38,6 +38,8 @@ model Task {
   rubric      String   @default("[]") // JSON [{id,description,weight}]
   hints       String   @default("[]") // JSON string[]
   testable    Boolean  @default(false)
+  // Optional guided lesson (Learn → Practice): JSON-stringified Lesson, null for plain tasks.
+  lesson      String? // JSON { topic, focus, overview, sections[], recap[] }
   status      String   @default("open") // open | reviewed
   createdAt   DateTime @default(now())
   submissions Submission[]

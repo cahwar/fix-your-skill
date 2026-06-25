@@ -8,6 +8,14 @@ import { useXp } from "@/components/XpProvider";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 interface RubricItem { id: string; description: string; weight: number }
+interface LessonSection { heading: string; body: string; keyPoints: string[]; codeExample: string }
+interface Lesson {
+  topic: string;
+  focus: string;
+  overview: string;
+  sections: LessonSection[];
+  recap: string[];
+}
 interface TaskDTO {
   id: string;
   title: string;
@@ -19,8 +27,16 @@ interface TaskDTO {
   rubric: RubricItem[];
   hints: string[];
   testable: boolean;
+  lesson: Lesson | null;
   status: string;
 }
+
+const FOCUS_LABEL: Record<string, string> = {
+  "applied-skill": "Applied skill",
+  "algorithms-data-structures": "Algorithms & data structures",
+  "stack-idioms": "Stack idioms",
+  "weak-areas": "Weak areas",
+};
 interface ReviewIssue { severity: string; description: string }
 interface ReviewDTO {
   verdict: "pass" | "needs-work" | "fail";
@@ -75,6 +91,10 @@ export default function TaskPage({ params }: { params: Promise<{ id: string }> }
   const [submitting, setSubmitting] = useState(false);
   const [showHints, setShowHints] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Soft gate: lesson tasks hide the problem/editor until the user finishes the
+  // lesson and clicks through. Plain tasks (and already-reviewed ones) reveal
+  // immediately.
+  const [taskRevealed, setTaskRevealed] = useState(false);
 
   useEffect(() => {
     fetch(`/api/tasks/${id}`)
@@ -84,6 +104,7 @@ export default function TaskPage({ params }: { params: Promise<{ id: string }> }
           setTask(d.task);
           setCode(d.submission?.code ?? d.task.starterCode ?? "");
           setReview(d.review ?? null);
+          setTaskRevealed(!d.task.lesson || d.task.status === "reviewed");
         } else {
           setNotFound(true);
         }
@@ -146,6 +167,15 @@ export default function TaskPage({ params }: { params: Promise<{ id: string }> }
         ← Dashboard
       </Link>
 
+      {task.lesson && (
+        <LessonPanel
+          lesson={task.lesson}
+          revealed={taskRevealed}
+          onReveal={() => setTaskRevealed(true)}
+        />
+      )}
+
+      {!taskRevealed ? null : (
       <div className="grid lg:grid-cols-2 gap-7 items-start">
         {/* problem */}
         <div className="space-y-4">
@@ -227,9 +257,173 @@ export default function TaskPage({ params }: { params: Promise<{ id: string }> }
           {error && <p className="text-[var(--color-neg)] text-sm">{error}</p>}
         </div>
       </div>
+      )}
 
       {submitting && !review && <ReviewSkeleton />}
       {review && <ReviewPanel review={review} />}
+    </div>
+  );
+}
+
+function LessonPanel({
+  lesson,
+  revealed,
+  onReveal,
+}: {
+  lesson: Lesson;
+  revealed: boolean;
+  onReveal: () => void;
+}) {
+  // step 0..sections.length-1 = a section; step === sections.length = recap/ready screen.
+  const [step, setStep] = useState(0);
+  // Once the task is revealed the lesson collapses to a slim, re-openable bar.
+  const [collapsed, setCollapsed] = useState(revealed);
+
+  const total = lesson.sections.length;
+  const onRecap = step >= total;
+  const section = onRecap ? null : lesson.sections[step];
+
+  if (collapsed) {
+    return (
+      <div
+        className="flex items-center gap-3 rounded-[12px] px-[18px] py-[13px]"
+        style={{ background: "var(--color-raised)", border: "1px solid rgba(124,108,255,0.30)" }}
+      >
+        <span className="text-[var(--color-accent)] text-[15px] leading-none">✓</span>
+        <div className="min-w-0">
+          <div className="mono text-[10.5px] uppercase tracking-[0.09em] text-[var(--color-accent-soft)]">
+            Lesson · {FOCUS_LABEL[lesson.focus] ?? lesson.focus}
+          </div>
+          <div className="text-[14px] font-medium truncate">{lesson.topic}</div>
+        </div>
+        <button
+          onClick={() => {
+            setStep(0);
+            setCollapsed(false);
+          }}
+          className="ml-auto flex-none text-[13px] text-[var(--color-accent)] hover:text-[var(--color-accent-hi)]"
+        >
+          Review lesson →
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="rounded-[16px] p-7"
+      style={{
+        background: "linear-gradient(160deg,rgba(124,108,255,0.10),rgba(124,108,255,0.03))",
+        border: "1px solid rgba(124,108,255,0.34)",
+      }}
+    >
+      <div className="flex items-center gap-2 flex-wrap mb-2">
+        <span
+          className="mono text-[11px] rounded-[6px] px-2 py-[3px]"
+          style={{ background: "rgba(124,108,255,0.12)", border: "1px solid rgba(124,108,255,0.28)", color: "#c9a9f0" }}
+        >
+          Lesson
+        </span>
+        <span className="mono text-[11px] text-[var(--color-text-2)]">
+          {FOCUS_LABEL[lesson.focus] ?? lesson.focus}
+        </span>
+      </div>
+      <h2 className="text-[22px] font-semibold tracking-[-0.02em] leading-tight">{lesson.topic}</h2>
+      <div className="mt-3 text-[var(--color-prose)]">
+        <Markdown>{lesson.overview}</Markdown>
+      </div>
+
+      {/* progress */}
+      <div className="flex items-center gap-1.5 mt-5 mb-5">
+        {lesson.sections.map((_, i) => (
+          <span
+            key={i}
+            className="h-[4px] flex-1 rounded-full transition-colors"
+            style={{ background: i <= step && !onRecap ? "var(--color-accent)" : i < step ? "var(--color-accent)" : "#332f3f" }}
+          />
+        ))}
+        <span
+          className="h-[4px] flex-1 rounded-full"
+          style={{ background: onRecap ? "var(--color-accent)" : "#332f3f" }}
+        />
+      </div>
+
+      {section ? (
+        <div>
+          <div className="mono text-[11px] uppercase tracking-[0.09em] text-[var(--color-muted)] mb-1">
+            Stage {step + 1} of {total}
+          </div>
+          <h3 className="text-[17px] font-semibold mb-3">{section.heading}</h3>
+          <div className="text-[var(--color-prose)]">
+            <Markdown>{section.body}</Markdown>
+          </div>
+          {section.codeExample.trim() && (
+            <div className="mt-4">
+              <Markdown>{"```\n" + section.codeExample + "\n```"}</Markdown>
+            </div>
+          )}
+          {section.keyPoints.length > 0 && (
+            <div className="mt-4">
+              <div className="mono text-[11px] uppercase tracking-[0.09em] text-[var(--color-accent-soft)] mb-2">
+                Key points
+              </div>
+              <ul className="space-y-2">
+                {section.keyPoints.map((k, i) => (
+                  <li key={i} className="flex gap-2.5 text-[14px]">
+                    <span className="mono text-[var(--color-accent)]">★</span>
+                    <span>{k}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div>
+          <div className="mono text-[11px] uppercase tracking-[0.09em] text-[var(--color-accent-soft)] mb-2">
+            Recap
+          </div>
+          <ul className="space-y-2">
+            {lesson.recap.map((r, i) => (
+              <li key={i} className="flex gap-2.5 text-[14.5px]">
+                <span className="mono text-[var(--color-accent)]">→</span>
+                <span>{r}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* nav */}
+      <div className="flex items-center justify-between gap-3 mt-7">
+        <button
+          onClick={() => setStep((s) => Math.max(0, s - 1))}
+          disabled={step === 0}
+          className="text-[13.5px] text-[var(--color-text-2)] hover:text-[var(--color-text)] disabled:opacity-40"
+        >
+          ← Back
+        </button>
+        {!onRecap ? (
+          <button
+            onClick={() => setStep((s) => s + 1)}
+            className="rounded-[10px] bg-[var(--color-accent)] text-white font-medium px-5 py-2.5"
+            style={{ boxShadow: "0 4px 18px rgba(124,108,255,0.30)" }}
+          >
+            {step + 1 === total ? "Recap →" : "Next stage →"}
+          </button>
+        ) : (
+          <button
+            onClick={() => {
+              onReveal();
+              setCollapsed(true);
+            }}
+            className="rounded-[10px] bg-[var(--color-accent)] text-white font-medium px-5 py-2.5"
+            style={{ boxShadow: "0 4px 18px rgba(124,108,255,0.30)" }}
+          >
+            {revealed ? "Done — back to task" : "I'm ready — show the task ↓"}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
